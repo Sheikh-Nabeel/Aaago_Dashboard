@@ -2,9 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  FaFacebookF,
-  FaGoogle,
-  FaLinkedinIn,
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
@@ -101,18 +98,18 @@ const Login = ({ theme = "light" }) => {
       }`}
     >
       <div
-        className={`shadow-lg rounded-2xl flex flex-col md:flex-row w-full max-w-6xl my-8 sm:my-12 overflow-hidden transition-colors duration-300 ${
+        className={`shadow-lg rounded-2xl w-full max-w-md my-8 sm:my-12 overflow-hidden transition-colors duration-300 ${
           theme === "dark" ? "bg-gray-800" : "bg-white"
         }`}
       >
-        {/* LEFT FORM */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 sm:p-10">
+        {/* LOGIN FORM */}
+        <div className="w-full flex flex-col justify-center items-center p-6 sm:p-10">
           <h2
             className={`text-2xl sm:text-3xl font-semibold mb-4 text-center ${
               theme === "dark" ? "text-yellow-400" : "text-[#013220]"
             }`}
           >
-            Sign in to Your Account
+            Log in to Your Account
           </h2>
 
           {(errors.form || error) && (
@@ -124,25 +121,6 @@ const Login = ({ theme = "light" }) => {
               {errors.form || error}
             </p>
           )}
-
-          <div className="flex space-x-3 mb-5">
-            {[FaFacebookF, FaGoogle, FaLinkedinIn].map((Icon, idx) => (
-              <button
-                key={idx}
-                className={`border rounded-full p-2 w-10 h-10 flex items-center justify-center transition-colors duration-300 ${
-                  theme === "dark"
-                    ? "border-gray-500 hover:bg-gray-600"
-                    : "border-gray-300 hover:bg-gray-100"
-                }`}
-              >
-                <Icon
-                  className={
-                    theme === "dark" ? "text-gray-300" : "text-gray-600"
-                  }
-                />
-              </button>
-            ))}
-          </div>
 
           <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
             {/* Identifier */}
@@ -251,46 +229,9 @@ const Login = ({ theme = "light" }) => {
               } ${isLoading || loading ? "opacity-50 cursor-not-allowed" : ""}`}
               disabled={isLoading || loading}
             >
-              {isLoading || loading ? "Signing In..." : "Sign In"}
+              {isLoading || loading ? "Logging In..." : "Log In"}
             </button>
           </form>
-        </div>
-
-        {/* RIGHT SIDE - LOGO + TEXT */}
-        <div
-          className={`w-full md:w-1/2 flex flex-col justify-center items-center p-8 transition-colors duration-300 ${
-            theme === "dark"
-              ? "bg-gradient-to-b from-gray-900 to-gray-700 text-yellow-400"
-              : "bg-gradient-to-b from-green-900 to-green-700 text-yellow-400"
-          }`}
-        >
-          <div className="flex flex-col items-center mb-6">
-            <img
-              src="/image.jpg"
-              alt="Aao Go Logo"
-              className="w-20 h-20 object-contain mb-2"
-            />
-            <h2 className="text-xl font-semibold text-yellow-400">
-              Welcome to Aao Go
-            </h2>
-          </div>
-
-          <p className="mt-2 text-sm sm:text-base text-center text-yellow-400">
-            Sign in and continue your journey with us.
-          </p>
-          <p className="text-center max-w-xs mb-6 z-10 text-sm text-yellow-400">
-            Don’t have an account? Sign up now!
-          </p>
-          <Link
-            to="/signup"
-            className={`border px-6 py-2 rounded-full transition text-sm ${
-              theme === "dark"
-                ? "border-yellow-400 hover:bg-yellow-400 hover:text-gray-900"
-                : "border-yellow-400 hover:bg-yellow-400 hover:text-green-900"
-            }`}
-          >
-            Sign Up
-          </Link>
         </div>
       </div>
     </div>

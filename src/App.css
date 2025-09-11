@@ -1,0 +1,26 @@
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Menu tab underline for active state */
+.menu-tab {
+  position: relative;
+  cursor: pointer;
+  padding-bottom: 8px;
+}
+
+.menu-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background-color: #DDC104; /* Yellow underline */
+}

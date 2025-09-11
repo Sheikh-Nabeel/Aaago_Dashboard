@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.menu-tab {
+  position: relative;
+  /* display: inline-block; */
+  cursor: pointer;
+  padding-bottom: 8px; /* spacing between text and line */
+}
+
+.menu-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 5px;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background-color: #DDC104; /* Yellow line */
+}
+.menu-tab.linebelow::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 5px;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background-color: #2F501C; /* Yellow line */
+}
+
+.btn-active{
+  background-color: yellow;
+  border-radius: 8px;
+  color: black;
+  padding: 5px;
+ 
+}
+.btn-inactive{
+  border: 1px solid yellow;
+  border-radius:8px;
+  padding:5px;
+  color:yellow;
+}
+/* Optional - smooth thin scrollbars globally */
+ .scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #facc15; 
+  border-radius: 9999px;
+} 
+
+.no-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow: hidden !important;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}

@@ -1,20 +1,10 @@
-import axios from 'axios';
+import axiosInstance from '../../services/axiosConfig';
 
-const API_URL = 'https://aaaogo.xyz/api/user/';
+const API_URL = '/user/';
 
 const getAllUsers = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('No authentication token found for getAllUsers');
-    throw new Error('No authentication token found');
-  }
-  console.log('Fetching all customers with token:', token.slice(0, 20) + '...');
   try {
-    const response = await axios.get(`${API_URL}customers`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axiosInstance.get(`${API_URL}customers`);
     console.log('getAllUsers response:', response.data);
     return {
       users: response.data.customers,
@@ -30,29 +20,14 @@ const getAllUsers = async () => {
 };
 
 const addAdmin = async (adminData) => {
-  const token = localStorage.getItem('token');
-  const response = await axios.post(`${API_URL}admin/add-admin`, adminData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await axiosInstance.post(`${API_URL}admin/add-admin`, adminData);
   return response.data;
 };
 
 
 const getAllDrivers = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('No authentication token found for getAllDrivers');
-    throw new Error('No authentication token found');
-  }
-  console.log('Fetching all drivers with token:', token.slice(0, 20) + '...');
   try {
-    const response = await axios.get(`${API_URL}drivers`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axiosInstance.get(`${API_URL}drivers`);
     console.log('getAllDrivers response:', response.data);
     return {
       drivers: response.data.drivers,
@@ -68,11 +43,6 @@ const getAllDrivers = async () => {
 };
 
 const editDriver = async (userId, userData) => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('No authentication token found for editDriver');
-    throw new Error('No authentication token found');
-  }
   console.log(`Sending PUT request for userId: ${userId}, URL: ${API_URL}edit-driver/${userId}, Data:`, userData);
   try {
     const controller = new AbortController();
@@ -80,9 +50,8 @@ const editDriver = async (userId, userData) => {
       console.log(`Request timeout for userId: ${userId}`);
       controller.abort();
     }, 10000); // 10 seconds timeout
-    const response = await axios.put(`${API_URL}edit-driver/${userId}`, userData, {
+    const response = await axiosInstance.put(`${API_URL}edit-driver/${userId}`, userData, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': userData instanceof FormData ? 'multipart/form-data' : 'application/json',
       },
       signal: controller.signal,
@@ -99,11 +68,6 @@ const editDriver = async (userId, userData) => {
 
 
 const editUser = async (userId, userData) => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('No authentication token found for editUser');
-    throw new Error('No authentication token found');
-  }
   console.log(`Sending PATCH request for userId: ${userId}, URL: ${API_URL}edit/${userId}, Data:`, userData);
   try {
     const controller = new AbortController();
@@ -111,9 +75,8 @@ const editUser = async (userId, userData) => {
       console.log(`Request timeout for userId: ${userId}`);
       controller.abort();
     }, 10000); // 10 seconds timeout
-    const response = await axios.patch(`${API_URL}edit/${userId}`, userData, {
+    const response = await axiosInstance.patch(`${API_URL}edit/${userId}`, userData, {
       headers: {
-        Authorization: `Bearer ${token}`,
       },
       signal: controller.signal,
     });
@@ -128,22 +91,14 @@ const editUser = async (userId, userData) => {
 };
 
 const deleteUser = async (userId) => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('No authentication token found for deleteUser');
-    throw new Error('No authentication token found');
-  }
-  console.log(`Sending DELETE request for userId: ${userId}, URL: ${API_URL}delete/${userId}, Token: ${token.slice(0, 20)}...`);
+  console.log(`Sending DELETE request for userId: ${userId}, URL: ${API_URL}delete/${userId}`);
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       console.log(`Request timeout for userId: ${userId}`);
       controller.abort();
     }, 15000); // 15 seconds timeout
-    const response = await axios.delete(`${API_URL}delete/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await axiosInstance.delete(`${API_URL}delete/${userId}`, {
       signal: controller.signal,
     });
     clearTimeout(timeoutId);

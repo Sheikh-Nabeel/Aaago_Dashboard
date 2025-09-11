@@ -4,7 +4,7 @@ import AdminApprovalNav from './AdminApprovalNav';
 import { useSelector, useDispatch } from 'react-redux';
 import { useGetPendingKYCsQuery, apiSlice } from '../../features/service/apiSlice';
 
-const IMAGE_BASE_URL = 'https://aaogobackend.xyz';
+const IMAGE_BASE_URL = 'https://aaaogo.xyz';
 
 const KYCVerificationTable = () => {
   const dispatch = useDispatch();

@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { checkTokenValidity } from './features/slice/authSlice';
+import ProtectedRoute from './Component/ProtectedRoute';
+import tokenRefreshService from './services/tokenRefreshService';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './Component/Navbar';
@@ -91,72 +95,93 @@ const Layout = ({ children }) => {
 };
 
 const AppRoutes = () => {
+  const dispatch = useDispatch();
+
+  // Check token validity on app load and periodically
+  useEffect(() => {
+    // Check token validity on app load
+    dispatch(checkTokenValidity());
+    
+    // Start automatic token refresh service
+    tokenRefreshService.startTokenRefreshCheck();
+    
+    // Check token validity every 5 minutes
+    const interval = setInterval(() => {
+      dispatch(checkTokenValidity());
+    }, 5 * 60 * 1000);
+
+    return () => {
+      clearInterval(interval);
+      tokenRefreshService.stopTokenRefreshCheck();
+    };
+  }, [dispatch]);
+
   return (
     <Layout>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Homepage />} />
-        <Route path="/mlm" element={<Mlm />} />
-        <Route path="/notification" element={<Notifications />} />
-        <Route path="/chatdetail" element={<ChatDetail />} />
-        <Route path="/dispatch" element={<Dispatch />} />
-        <Route path="/livelocation" element={<Livelocation />} />
-        <Route path="/adminmanagement" element={<AdminManagement />} />
-        <Route path="/drivermanagement" element={<DriverManagement />} />
-        <Route path="/driverprofile" element={<DriverProfile />} />
-        <Route path="/drivermonitoring" element={<DriverMonitoring />} />
-        <Route path="/driverhistory" element={<DriverHistory />} />
-        <Route path="/earningandpayouts" element={<EarningsAndPayouts />} />
-        <Route path="/ratings" element={<Ratings />} />
-        <Route path="/penalty" element={<Penalty />} />
-        <Route path="/report" element={<Report />} />
-        <Route path="/referraltree" element={<ReferralTree />} />
-        <Route path="/customermanagement" element={<CustomerManagement />} />
-        <Route path="/customerprofile" element={<CustomerProfile />} />
-        <Route path="/customerhistory" element={<CustomerHistory />} />
-        <Route path="/customerearningpayout" element={<CustomerEarningPayout />} />
-        <Route path="/customermlm" element={<CustomerMLM />} />
-        <Route path="/customerrating" element={<CustomerRatings />} />
-        <Route path="/customercomplain" element={<CustomerComplain />} />
-        <Route path="/customerreferraltree" element={<CustomerReferralTree />} />
-        <Route path="/proposalmanagement" element={<ProposalManagement />} />
-        <Route path="/agreementrecord" element={<AgreementRecord />} />
-        <Route path="/marketplacecontrol" element={<MarketPlaceControl />} />
-        <Route path="/overview" element={<OverView />} />
-        <Route path="/fraudprofile/:id" element={<FraudProfile />} />
-        <Route path="/autolockRulesPanel" element={<AutoLockRulesPanel />} />
-        <Route path="/ruleeditorpanel" element={<RuleEditorPanel />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/paymentoverview" element={<PaymentOverview />} />
-        <Route path="/walletadjustment" element={<WalletAdjustment />} />
-        <Route path="/transactions" element={<WithdrawalManagement />} />
-        <Route path="/walletfreezingrules" element={<WalletFreezingRule />} />
-        <Route path="/transactionlog" element={<TransactionLog />} />
-        <Route path="/alertnotification" element={<AlertAndSmartNotifi />} />
-        <Route path="/unachievedpool" element={<UnachievedPoolManage />} />
-        <Route path="/kycverification" element={<KYCVerificationTable />} />
-        <Route path="/serviceProvider" element={<ServiceProvider />} />
-        <Route path="/serviceProviderDetail/:id" element={<ServiceProviderDetail />} />
-        <Route path="/driverhiring" element={<DriverHiring />} />
-        <Route path="/driverhiringdetail/:id" element={<DriverHiringDetail />} />
-        <Route path="/vendorreq" element={<VendorOnBordingReq />} />
-        <Route path="/drawalRequest" element={<WithDrawalRequest />} />
-        <Route path="/complainresolve" element={<ComplainResolution />} />
-        <Route path="/complaindetail/:id" element={<ComplaintDetails />} />
-        <Route path="/promocode" element={<PromoCode />} />
-        <Route path="/promocodedetail/:id" element={<PromoCodeDetails />} />
-        <Route path="/accountedit" element={<ManualAccountEdits />} />
-        <Route path="/reviewandrating" element={<ReviewAndRating />} />
-        <Route path="/reportanalytics" element={<ReportAnalytics />} />
-        <Route path="/driverreport" element={<DriverReport />} />
-        <Route path="/rideservicereport" element={<RideServiceReport />} />
-        <Route path="/supportreport" element={<SupportReport />} />
-        <Route path="/earningandcommission" element={<EarningAndCommission />} />
-        <Route path="/approvalactivities" element={<ApprovalActivities />} />
-        <Route path="/teammlmreport" element={<TeamMLMReport />} />
-        <Route path="/withdrawalandtransaction" element={<WithdrawalTransactionLog />} />
-        <Route path="/customreportgenerator" element={<CustomReportGenerator />} />
-        <Route path="/customreporttable" element={<CustomReportTable />} />
+        <Route path="/home" element={<ProtectedRoute><Homepage /></ProtectedRoute>} />
+        <Route path="/mlm" element={<ProtectedRoute><Mlm /></ProtectedRoute>} />
+        <Route path="/notification" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/chatdetail" element={<ProtectedRoute><ChatDetail /></ProtectedRoute>} />
+        <Route path="/dispatch" element={<ProtectedRoute><Dispatch /></ProtectedRoute>} />
+        <Route path="/livelocation" element={<ProtectedRoute><Livelocation /></ProtectedRoute>} />
+        <Route path="/adminmanagement" element={<ProtectedRoute><AdminManagement /></ProtectedRoute>} />
+        <Route path="/drivermanagement" element={<ProtectedRoute><DriverManagement /></ProtectedRoute>} />
+        <Route path="/driverprofile" element={<ProtectedRoute><DriverProfile /></ProtectedRoute>} />
+        <Route path="/drivermonitoring" element={<ProtectedRoute><DriverMonitoring /></ProtectedRoute>} />
+        <Route path="/driverhistory" element={<ProtectedRoute><DriverHistory /></ProtectedRoute>} />
+        <Route path="/earningandpayouts" element={<ProtectedRoute><EarningsAndPayouts /></ProtectedRoute>} />
+        <Route path="/ratings" element={<ProtectedRoute><Ratings /></ProtectedRoute>} />
+        <Route path="/penalty" element={<ProtectedRoute><Penalty /></ProtectedRoute>} />
+        <Route path="/report" element={<ProtectedRoute><Report /></ProtectedRoute>} />
+        <Route path="/referraltree" element={<ProtectedRoute><ReferralTree /></ProtectedRoute>} />
+        <Route path="/customermanagement" element={<ProtectedRoute><CustomerManagement /></ProtectedRoute>} />
+        <Route path="/customerprofile" element={<ProtectedRoute><CustomerProfile /></ProtectedRoute>} />
+        <Route path="/customerhistory" element={<ProtectedRoute><CustomerHistory /></ProtectedRoute>} />
+        <Route path="/customerearningpayout" element={<ProtectedRoute><CustomerEarningPayout /></ProtectedRoute>} />
+        <Route path="/customermlm" element={<ProtectedRoute><CustomerMLM /></ProtectedRoute>} />
+        <Route path="/customerrating" element={<ProtectedRoute><CustomerRatings /></ProtectedRoute>} />
+        <Route path="/customercomplain" element={<ProtectedRoute><CustomerComplain /></ProtectedRoute>} />
+        <Route path="/customerreferraltree" element={<ProtectedRoute><CustomerReferralTree /></ProtectedRoute>} />
+        <Route path="/proposalmanagement" element={<ProtectedRoute><ProposalManagement /></ProtectedRoute>} />
+        <Route path="/agreementrecord" element={<ProtectedRoute><AgreementRecord /></ProtectedRoute>} />
+        <Route path="/marketplacecontrol" element={<ProtectedRoute><MarketPlaceControl /></ProtectedRoute>} />
+        <Route path="/overview" element={<ProtectedRoute><OverView /></ProtectedRoute>} />
+        <Route path="/fraudprofile/:id" element={<ProtectedRoute><FraudProfile /></ProtectedRoute>} />
+        <Route path="/autolockRulesPanel" element={<ProtectedRoute><AutoLockRulesPanel /></ProtectedRoute>} />
+        <Route path="/ruleeditorpanel" element={<ProtectedRoute><RuleEditorPanel /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+        <Route path="/paymentoverview" element={<ProtectedRoute><PaymentOverview /></ProtectedRoute>} />
+        <Route path="/walletadjustment" element={<ProtectedRoute><WalletAdjustment /></ProtectedRoute>} />
+        <Route path="/transactions" element={<ProtectedRoute><WithdrawalManagement /></ProtectedRoute>} />
+        <Route path="/walletfreezingrules" element={<ProtectedRoute><WalletFreezingRule /></ProtectedRoute>} />
+        <Route path="/transactionlog" element={<ProtectedRoute><TransactionLog /></ProtectedRoute>} />
+        <Route path="/alertnotification" element={<ProtectedRoute><AlertAndSmartNotifi /></ProtectedRoute>} />
+        <Route path="/unachievedpool" element={<ProtectedRoute><UnachievedPoolManage /></ProtectedRoute>} />
+        <Route path="/kycverification" element={<ProtectedRoute><KYCVerificationTable /></ProtectedRoute>} />
+        <Route path="/serviceProvider" element={<ProtectedRoute><ServiceProvider /></ProtectedRoute>} />
+        <Route path="/serviceProviderDetail/:id" element={<ProtectedRoute><ServiceProviderDetail /></ProtectedRoute>} />
+        <Route path="/driverhiring" element={<ProtectedRoute><DriverHiring /></ProtectedRoute>} />
+        <Route path="/driverhiringdetail/:id" element={<ProtectedRoute><DriverHiringDetail /></ProtectedRoute>} />
+        <Route path="/vendorreq" element={<ProtectedRoute><VendorOnBordingReq /></ProtectedRoute>} />
+        <Route path="/drawalRequest" element={<ProtectedRoute><WithDrawalRequest /></ProtectedRoute>} />
+        <Route path="/complainresolve" element={<ProtectedRoute><ComplainResolution /></ProtectedRoute>} />
+        <Route path="/complaindetail/:id" element={<ProtectedRoute><ComplaintDetails /></ProtectedRoute>} />
+        <Route path="/promocode" element={<ProtectedRoute><PromoCode /></ProtectedRoute>} />
+        <Route path="/promocodedetail/:id" element={<ProtectedRoute><PromoCodeDetails /></ProtectedRoute>} />
+        <Route path="/accountedit" element={<ProtectedRoute><ManualAccountEdits /></ProtectedRoute>} />
+        <Route path="/reviewandrating" element={<ProtectedRoute><ReviewAndRating /></ProtectedRoute>} />
+        <Route path="/reportanalytics" element={<ProtectedRoute><ReportAnalytics /></ProtectedRoute>} />
+        <Route path="/driverreport" element={<ProtectedRoute><DriverReport /></ProtectedRoute>} />
+        <Route path="/rideservicereport" element={<ProtectedRoute><RideServiceReport /></ProtectedRoute>} />
+        <Route path="/supportreport" element={<ProtectedRoute><SupportReport /></ProtectedRoute>} />
+        <Route path="/earningandcommission" element={<ProtectedRoute><EarningAndCommission /></ProtectedRoute>} />
+        <Route path="/approvalactivities" element={<ProtectedRoute><ApprovalActivities /></ProtectedRoute>} />
+        <Route path="/teammlmreport" element={<ProtectedRoute><TeamMLMReport /></ProtectedRoute>} />
+        <Route path="/withdrawalandtransaction" element={<ProtectedRoute><WithdrawalTransactionLog /></ProtectedRoute>} />
+        <Route path="/customreportgenerator" element={<ProtectedRoute><CustomReportGenerator /></ProtectedRoute>} />
+        <Route path="/customreporttable" element={<ProtectedRoute><CustomReportTable /></ProtectedRoute>} />
       </Routes>
     </Layout>
   );

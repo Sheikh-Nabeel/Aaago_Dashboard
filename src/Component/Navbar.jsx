@@ -4,7 +4,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosNotifications } from "react-icons/io";
 import { BiSliderAlt } from "react-icons/bi";
 import { LuMessageCircleMore } from "react-icons/lu";
-import { FaUserShield } from "react-icons/fa";
+import { FaUserShield, FaUser } from "react-icons/fa";
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/slice/authSlice';
@@ -12,7 +12,7 @@ import { useGetCurrentUserQuery } from '../features/service/apiSlice';
 import { apiSlice } from '../features/service/apiSlice'; // Import apiSlice to invalidate cache
 
 // Define the base URL for images (without /api)
-const IMAGE_BASE_URL = "https://aaogobackend.xyz";
+const IMAGE_BASE_URL = "https://aaaogo.xyz";
 
 const Navbar = () => {
   const location = useLocation();
@@ -43,22 +43,42 @@ const Navbar = () => {
   // Construct full image URL
   const selfieImageUrl = userData?.user?.selfieImage
     ? `${IMAGE_BASE_URL}/uploads/${userData.user.selfieImage.replace(/^\/?uploads\//, '')}`
-    : '/image.jpg';
+    : null;
+
+  // Get user initials for avatar
+  const getUserInitials = (username) => {
+    if (!username) return 'G';
+    return username.split(' ').map(name => name[0]).join('').toUpperCase().slice(0, 2);
+  };
 
   console.log('Selfie Image URL:', selfieImageUrl);
 
   return (
     <div className="flex justify-between items-center px-2 border-b border-[#3A5719]">
       <div className="flex items-center gap-4 pr-[50px] py-1 border-r border-[#546816]">
-        <img
-          className="rounded-full w-20 h-20 object-cover border-2 border-[#DDC104]"
-          src={selfieImageUrl}
-          alt="Profile"
-          onError={(e) => {
-            console.log('Image load error:', e);
-            e.target.src = '/image.jpg';
-          }}
-        />
+        {selfieImageUrl ? (
+          <img
+            className="rounded-full w-20 h-20 object-cover border-2 border-[#DDC104]"
+            src={selfieImageUrl}
+            alt="Profile"
+            onError={(e) => {
+              console.log('Image load error:', e);
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div 
+          className={`rounded-full w-20 h-20 border-2 border-[#DDC104] bg-[#013220] flex items-center justify-center ${selfieImageUrl ? 'hidden' : 'flex'}`}
+        >
+          {userData?.user?.username ? (
+            <span className="text-[#DDC104] font-bold text-xl">
+              {getUserInitials(userData.user.username)}
+            </span>
+          ) : (
+            <FaUser className="text-[#DDC104] text-2xl" />
+          )}
+        </div>
         <div className="flex flex-col justify-center">
           <h6 className="text-xs">Welcome</h6>
           <h1 className="font-bold text-lg">
@@ -70,8 +90,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Search Box */}
-      <div className="flex items-center border border-[#DDC104] rounded-full px-4 py-2 gap-2 relative bg-[#013220] hover:border-yellow-400 transition">
+      {/* Search Box - Global search functionality for the dashboard */}
+      {/* <div className="flex items-center border border-[#DDC104] rounded-full px-4 py-2 gap-2 relative bg-[#013220] hover:border-yellow-400 transition">
         <CiSearch size={24} />
         <input
           type="text"
@@ -81,17 +101,20 @@ const Navbar = () => {
         <div className="absolute right-[1px] p-[10px] border-l border-t border-b border-[#DDC104] rounded-full cursor-pointer">
           <BiSliderAlt size={20} />
         </div>
-      </div>
+      </div> */}
 
-      {/* Icons Right Side */}
+      {/* Navigation Icons - Right side action buttons */}
       <div className="flex gap-4 items-center text-[#DDC104]">
+        {/* Settings Icon - Opens application settings and preferences */}
         <div className="p-2 border border-[#DDC104] rounded-full hover:bg-[#DDC104] hover:text-black transition cursor-pointer">
           <IoSettingsOutline size={25} />
         </div>
-        <div className="p-2 border border-[#DDC104] rounded-full hover:bg-[#DDC104] hover:text-black transition cursor-pointer">
+        {/* Message Icon - Opens messaging/chat interface for communication */}
+        {/* <div className="p-2 border border-[#DDC104] rounded-full hover:bg-[#DDC104] hover:text-black transition cursor-pointer">
           <LuMessageCircleMore size={25} />
-        </div>
-        <NavLink
+        </div> */}
+        {/* Notification Icon - Navigates to notifications page, shows active state when selected */}
+        {/* <NavLink
           to="/notification"
           className={({ isActive }) =>
             `p-2 border border-[#DDC104] rounded-full hover:bg-[#DDC104] hover:text-black transition cursor-pointer ${
@@ -100,7 +123,7 @@ const Navbar = () => {
           }
         >
           <IoIosNotifications size={25} />
-        </NavLink>
+        </NavLink> */}
         {isSuperadmin && (
           <NavLink
             to="/adminmanagement"

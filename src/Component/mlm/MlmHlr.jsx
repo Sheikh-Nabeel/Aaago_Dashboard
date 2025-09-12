@@ -15,7 +15,7 @@ const MlmHlr = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch('https://aaaogo.xyz/api/mlm/hlr/leaderboard?page=1&limit=20');
+        const response = await fetch('http://localhost:3001/api/mlm/hlr/leaderboard?page=1&limit=20');
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard data');
         }

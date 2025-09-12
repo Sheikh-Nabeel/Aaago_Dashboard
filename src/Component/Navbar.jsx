@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { CiSearch, CiLogin } from "react-icons/ci";
 import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosNotifications } from "react-icons/io";
@@ -10,15 +10,18 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/slice/authSlice';
 import { useGetCurrentUserQuery } from '../features/service/apiSlice';
 import { apiSlice } from '../features/service/apiSlice'; // Import apiSlice to invalidate cache
+import { toast } from 'react-toastify';
+import axiosInstance from '../services/axiosConfig';
 
 // Define the base URL for images (without /api)
-const IMAGE_BASE_URL = "https://aaaogo.xyz";
+const IMAGE_BASE_URL = "http://localhost:3001";
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated, token } = useSelector((state) => state.auth);
+  const fileInputRef = useRef(null);
 
   console.log('Auth State:', { isAuthenticated, token });
 
@@ -53,14 +56,77 @@ const Navbar = () => {
 
   console.log('Selfie Image URL:', selfieImageUrl);
 
+  // Handle profile picture click
+  const handleProfilePictureClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Handle file selection and upload
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please select a valid image file (JPEG, PNG, GIF)');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+
+      const response = await axiosInstance.patch('/user/update-profile-picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        toast.success('Profile picture updated successfully!');
+        // Invalidate the current user query to refetch updated data
+        dispatch(apiSlice.util.invalidateTags(['User']));
+      } else {
+        toast.error('Failed to update profile picture');
+      }
+    } catch (error) {
+      console.error('Error updating profile picture:', error);
+      toast.error('Failed to update profile picture');
+    }
+
+    // Reset file input
+    event.target.value = '';
+  };
+
   return (
     <div className="flex justify-between items-center px-2 border-b border-[#3A5719]">
       <div className="flex items-center gap-4 pr-[50px] py-1 border-r border-[#546816]">
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          style={{ display: 'none' }}
+        />
+        
         {selfieImageUrl ? (
           <img
-            className="rounded-full w-20 h-20 object-cover border-2 border-[#DDC104]"
+            className="rounded-full w-20 h-20 object-cover border-2 border-[#DDC104] cursor-pointer hover:opacity-80 transition-opacity"
             src={selfieImageUrl}
             alt="Profile"
+            onClick={handleProfilePictureClick}
+            title="Click to update profile picture"
             onError={(e) => {
               console.log('Image load error:', e);
               e.target.style.display = 'none';
@@ -69,7 +135,9 @@ const Navbar = () => {
           />
         ) : null}
         <div 
-          className={`rounded-full w-20 h-20 border-2 border-[#DDC104] bg-[#013220] flex items-center justify-center ${selfieImageUrl ? 'hidden' : 'flex'}`}
+          className={`rounded-full w-20 h-20 border-2 border-[#DDC104] bg-[#013220] flex items-center justify-center cursor-pointer hover:bg-[#024A30] transition-colors ${selfieImageUrl ? 'hidden' : 'flex'}`}
+          onClick={handleProfilePictureClick}
+          title="Click to add profile picture"
         >
           {userData?.user?.username ? (
             <span className="text-[#DDC104] font-bold text-xl">

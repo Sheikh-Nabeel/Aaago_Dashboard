@@ -2,36 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
 const MlmBbr = () => {
-  // Static offers data
-  const offers = [
-    {
-      type: 'Daily',
-      title: 'Quick Booster',
-      reward: 'AED 10',
-      duration: '1 Day',
-      personalRides: 5,
-      newReferrals: 1,
-      newbieRides: 7,
-    },
-    {
-      type: 'Weekly',
-      title: 'Boomer Offer',
-      reward: 'AED 50',
-      duration: '1 Week',
-      personalRides: 15,
-      newReferrals: 3,
-      newbieRides: 21,
-    },
-    {
-      type: 'Monthly',
-      title: 'Mega Booster',
-      reward: 'AED 200',
-      duration: '1 Month',
-      personalRides: 60,
-      newReferrals: 10,
-      newbieRides: 100,
-    },
-  ];
 
   // State for API data
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -60,7 +30,7 @@ const MlmBbr = () => {
         setLoading(true);
 
         // Fetch campaign data
-        const campaignResponse = await fetch('https://aaaogo.xyz/api/mlm/bbr/campaign');
+        const campaignResponse = await fetch('http://localhost:3001/api/mlm/bbr/campaign');
         if (!campaignResponse.ok) {
           throw new Error(`Failed to fetch campaign data: ${campaignResponse.status} ${campaignResponse.statusText}`);
         }
@@ -76,7 +46,7 @@ const MlmBbr = () => {
         setCampaignData(campaignJson.data?.currentCampaign || null);
 
         // Fetch leaderboard data
-        const leaderboardResponse = await fetch('https://aaaogo.xyz/api/mlm/bbr/leaderboard');
+        const leaderboardResponse = await fetch('http://localhost:3001/api/mlm/bbr/leaderboard');
         if (!leaderboardResponse.ok) {
           throw new Error(`Failed to fetch leaderboard data: ${leaderboardResponse.status} ${leaderboardResponse.statusText}`);
         }
@@ -122,7 +92,7 @@ const MlmBbr = () => {
     }
 
     try {
-      const url = 'https://aaaogo.xyz/api/mlm/admin/bbr/campaign';
+      const url = 'http://localhost:3001/api/mlm/admin/bbr/campaign';
       const method = isEditing ? 'PUT' : 'POST';
       const response = await fetch(url, {
         method,
@@ -162,7 +132,7 @@ const MlmBbr = () => {
       setIsEditing(false);
 
       // Refetch campaign data to update the UI
-      const refetchResponse = await fetch('https://aaaogo.xyz/api/mlm/bbr/campaign');
+      const refetchResponse = await fetch('http://localhost:3001/api/mlm/bbr/campaign');
       if (refetchResponse.ok) {
         const refetchJson = await refetchResponse.json();
         console.log('Refetched Campaign Data:', refetchJson);
@@ -197,7 +167,7 @@ const MlmBbr = () => {
     if (!campaignData) return;
 
     try {
-      const response = await fetch('https://aaaogo.xyz/api/mlm/admin/bbr/campaign', {
+      const response = await fetch('http://localhost:3001/api/mlm/admin/bbr/campaign', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -454,40 +424,7 @@ const MlmBbr = () => {
         </div>
       )}
 
-      {/* Offers Table */}
-      {!loading && !error && (
-        <div>
-          <h3 className="text-md font-semibold mb-2">Available Offers</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full border border-yellow-400 text-sm">
-              <thead className="border-b border-yellow-400">
-                <tr>
-                  <th className="px-3 py-2">Type</th>
-                  <th className="px-3 py-2">Offer Name</th>
-                  <th className="px-3 py-2">Reward</th>
-                  <th className="px-3 py-2">Duration</th>
-                  <th className="px-3 py-2">Personal Rides</th>
-                  <th className="px-3 py-2">New Referrals</th>
-                  <th className="px-3 py-2">Newbie Rides</th>
-                </tr>
-              </thead>
-              <tbody>
-                {offers.map((offer, index) => (
-                  <tr key={index} className="text-center hover:bg-[#014b38]">
-                    <td className="px-3 py-2">{offer.type}</td>
-                    <td className="px-3 py-2">{offer.title}</td>
-                    <td className="px-3 py-2">{offer.reward}</td>
-                    <td className="px-3 py-2">{offer.duration}</td>
-                    <td className="px-3 py-2">{offer.personalRides}</td>
-                    <td className="px-3 py-2">{offer.newReferrals}</td>
-                    <td className="px-3 py-2">{offer.newbieRides}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

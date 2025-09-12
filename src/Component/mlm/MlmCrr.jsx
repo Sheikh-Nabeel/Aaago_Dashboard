@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify"; // Import toast
 import CrrLineChart from "./CrrLineChart";
 import CrrTeamStructureChart from "./CrrTeamStructureChart";
-import { CiUser } from "react-icons/ci";
-import { RiFocus2Line } from "react-icons/ri";
+
 
 const MlmCrr = () => {
   const [leaderboardData, setLeaderboardData] = useState(null);
@@ -17,7 +16,7 @@ const MlmCrr = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch("https://aaaogo.xyz/api/mlm/crr/leaderboard");
+        const response = await fetch("http://localhost:3001/api/mlm/crr/leaderboard");
         const result = await response.json();
         if (result.success) {
           setLeaderboardData(result.data.leaderboard);
@@ -37,7 +36,7 @@ const MlmCrr = () => {
   useEffect(() => {
     const fetchCrrConfig = async () => {
       try {
-        const response = await fetch("https://aaaogo.xyz/api/mlm/admin/crr/config");
+        const response = await fetch("http://localhost:3001/api/mlm/admin/crr/config");
         const result = await response.json();
         if (result.success) {
           setCrrConfigData(result.data);
@@ -71,7 +70,7 @@ const MlmCrr = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://aaaogo.xyz/api/mlm/admin/crr/config", {
+      const response = await fetch("http://localhost:3001/api/mlm/admin/crr/config", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -100,20 +99,6 @@ const MlmCrr = () => {
   }
 
   const topEarner = leaderboardData?.topEarners[0] || {};
-  const cardData = [
-    {
-      icon: CiUser,
-      title: "PGP",
-      earn: `${topEarner.qualificationPoints?.pgp || 0} / 1500`,
-      chartData: [20, 40, 86, 60, 90], // Placeholder
-    },
-    {
-      icon: RiFocus2Line,
-      title: "TGP",
-      earn: `${topEarner.qualificationPoints?.tgp || 0} / 400`,
-      chartData: [10, 22, 34, 25, 15], // Placeholder
-    },
-  ];
 
   return (
     <div className="p-4 space-y-6 w-full text-yellow-400">
@@ -373,29 +358,7 @@ const MlmCrr = () => {
         </div>
       </div>
 
-      {/* Cards */}
-      <div className="flex gap-8 w-full justify-around">
-        {cardData.map((item, index) => {
-          const Icon = item.icon;
-          return (
-            <div
-              key={index}
-              className="flex flex-col gap-1 bg-gradient-to-b from-[#03a66a] to-[#013723] rounded-lg px-4 py-5 shadow-lg shadow-black/40 w-80 hover:scale-105 transition-transform"
-            >
-              <div className="flex items-center gap-2">
-                <Icon className="text-2xl" />
-                <p className="text-base font-semibold tracking-wide">
-                  {item.title}
-                </p>
-              </div>
-              <h2 className="text-2xl font-bold">{item.earn}</h2>
-              <div>
-                <CrrLineChart data={item.chartData} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+
 
       {/* Metadata */}
       <div className="flex justify-between text-sm">

@@ -38,7 +38,7 @@ const AdminManagement = () => {
   const fetchAdmins = async () => {
     try {
       const response = await axios.get(
-        "https://aaaogo.xyz/api/user/admins",
+        "http://localhost:3001/api/user/admins",
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -101,7 +101,7 @@ const AdminManagement = () => {
 
     try {
       const response = await axios.post(
-        "https://aaaogo.xyz/api/user/admin/add-admin",
+        "http://localhost:3001/api/user/admin/add-admin",
         newAdmin,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -136,7 +136,7 @@ const AdminManagement = () => {
 
     try {
       await axios.put(
-        `https://aaaogo.xyz/api/user/admin/edit-admin/${editingAdmin._id}`,
+        `http://localhost:3001/api/user/admin/edit-admin/${editingAdmin._id}`,
         editingAdmin,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -157,7 +157,7 @@ const AdminManagement = () => {
     if (window.confirm("Are you sure you want to delete this admin?")) {
       try {
         await axios.delete(
-          `https://aaaogo.xyz/api/user/admin/delete-admin/${adminId}`,
+          `http://localhost:3001/api/user/admin/delete-admin/${adminId}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

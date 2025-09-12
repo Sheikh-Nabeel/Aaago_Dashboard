@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 const MlmHlr = () => {
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // HLR Configuration state
+  const [hlrConfig, setHlrConfig] = useState({
+    requiredPGP: '',
+    requiredTGP: '',
+    retirementAge: '',
+    rewardAmount: ''
+  });
+  const [hlrLoading, setHlrLoading] = useState(false);
 
   const hlrCriteria = {
     accumulatedPGP: 'Min 25%',
@@ -12,10 +22,95 @@ const MlmHlr = () => {
     timeLimit: 'No time limitations',
   };
 
+  // Fetch HLR configuration
+  const fetchHlrConfig = async () => {
+    try {
+      const response = await fetch('https://aaaogo.xyz/api/mlm/admin/hlr/config');
+      if (response.ok) {
+        const json = await response.json();
+        if (json.success && json.data) {
+          setHlrConfig({
+            requiredPGP: json.data.requiredPGP || '',
+            requiredTGP: json.data.requiredTGP || '',
+            retirementAge: json.data.retirementAge || '',
+            rewardAmount: json.data.rewardAmount || ''
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch HLR config:', err);
+    }
+  };
+  
+  // Handle HLR config input change
+  const handleHlrInputChange = (e) => {
+    const { name, value } = e.target;
+    setHlrConfig(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  // Handle HLR config submit
+  const handleHlrSubmit = async (e) => {
+    e.preventDefault();
+    setHlrLoading(true);
+    
+    try {
+      // Only include fields that have values
+      const updateData = {};
+      if (hlrConfig.requiredPGP && hlrConfig.requiredPGP.trim() !== '') {
+        updateData.requiredPGP = Number(hlrConfig.requiredPGP);
+      }
+      if (hlrConfig.requiredTGP && hlrConfig.requiredTGP.trim() !== '') {
+        updateData.requiredTGP = Number(hlrConfig.requiredTGP);
+      }
+      if (hlrConfig.retirementAge && hlrConfig.retirementAge.trim() !== '') {
+        updateData.retirementAge = Number(hlrConfig.retirementAge);
+      }
+      if (hlrConfig.rewardAmount && hlrConfig.rewardAmount.trim() !== '') {
+        updateData.rewardAmount = Number(hlrConfig.rewardAmount);
+      }
+      
+      // Check if at least one field is being updated
+      if (Object.keys(updateData).length === 0) {
+        toast.error('Please fill at least one field to update');
+        return;
+      }
+      
+      const response = await fetch('https://aaaogo.xyz/api/mlm/admin/hlr/config', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update HLR config: ${response.status} ${response.statusText}`);
+      }
+      
+      const json = await response.json();
+      if (!json.success) {
+        throw new Error(json.message || 'Failed to update HLR configuration');
+      }
+      
+      toast.success(json.message || 'HLR configuration updated successfully');
+      
+      // Refresh the config after successful update
+      fetchHlrConfig();
+    } catch (err) {
+      console.error('Update HLR config error:', err);
+      toast.error(err.message);
+    } finally {
+      setHlrLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/mlm/hlr/leaderboard?page=1&limit=20');
+        const response = await fetch('https://aaaogo.xyz/api/mlm/hlr/leaderboard?page=1&limit=20');
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard data');
         }
@@ -29,6 +124,7 @@ const MlmHlr = () => {
     };
 
     fetchLeaderboard();
+    fetchHlrConfig();
   }, []);
 
   if (loading) {
@@ -42,6 +138,66 @@ const MlmHlr = () => {
   return (
     <div className="p-4 rounded-lg text-yellow-400">
       <h2 className="text-lg font-bold mb-4">Honorpay Loyalty Reward (HLR)</h2>
+      
+      {/* HLR Configuration Section */}
+      <div className="mb-6 p-4 border border-yellow-400 rounded-lg">
+        <h3 className="text-md font-semibold mb-2 text-yellow-400">HLR Configuration</h3>
+        <form onSubmit={handleHlrSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-yellow-400">Required PGP</label>
+              <input
+                type="number"
+                name="requiredPGP"
+                value={hlrConfig.requiredPGP}
+                onChange={handleHlrInputChange}
+                className="w-full p-2 border border-yellow-400 rounded bg-transparent text-yellow-400"
+                placeholder="e.g., 250000"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-yellow-400">Required TGP</label>
+              <input
+                type="number"
+                name="requiredTGP"
+                value={hlrConfig.requiredTGP}
+                onChange={handleHlrInputChange}
+                className="w-full p-2 border border-yellow-400 rounded bg-transparent text-yellow-400"
+                placeholder="e.g., 7000000"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-yellow-400">Retirement Age</label>
+              <input
+                type="number"
+                name="retirementAge"
+                value={hlrConfig.retirementAge}
+                onChange={handleHlrInputChange}
+                className="w-full p-2 border border-yellow-400 rounded bg-transparent text-yellow-400"
+                placeholder="e.g., 60"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-yellow-400">Reward Amount (AED)</label>
+              <input
+                type="number"
+                name="rewardAmount"
+                value={hlrConfig.rewardAmount}
+                onChange={handleHlrInputChange}
+                className="w-full p-2 border border-yellow-400 rounded bg-transparent text-yellow-400"
+                placeholder="e.g., 75000"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={hlrLoading}
+            className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500 disabled:opacity-50"
+          >
+            {hlrLoading ? 'Updating...' : 'Update HLR Configuration'}
+          </button>
+        </form>
+      </div>
 
       {/* Criteria Table */}
       <div className="overflow-x-auto mb-8">

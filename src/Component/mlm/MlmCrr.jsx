@@ -16,7 +16,7 @@ const MlmCrr = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/mlm/crr/leaderboard");
+        const response = await fetch("https://aaaogo.xyz/api/mlm/crr/leaderboard");
         const result = await response.json();
         if (result.success) {
           setLeaderboardData(result.data.leaderboard);
@@ -36,7 +36,7 @@ const MlmCrr = () => {
   useEffect(() => {
     const fetchCrrConfig = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/mlm/admin/crr/config");
+        const response = await fetch("https://aaaogo.xyz/api/mlm/admin/crr/config");
         const result = await response.json();
         if (result.success) {
           setCrrConfigData(result.data);
@@ -70,7 +70,7 @@ const MlmCrr = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:3001/api/mlm/admin/crr/config", {
+      const response = await fetch("https://aaaogo.xyz/api/mlm/admin/crr/config", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +136,7 @@ const MlmCrr = () => {
             {formData?.crrRanks &&
               Object.keys(formData.crrRanks).map((rank) => (
                 <div key={rank} className="border border-yellow-400 p-4 rounded-lg">
-                  <h4 className="text-sm font-semibold">{rank}</h4>
+                  <h4 className="text-sm font-semibold">{formData.crrRanks[rank].name} {formData.crrRanks[rank].icon}</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm">Name</label>

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api/mlm/';
+const API_URL = 'https://aaaogo.xyz/api/mlm/';
 
 export const getAdminMLMDashboard = async () => {
   try {

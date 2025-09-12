@@ -13,13 +13,13 @@ const Ambassador = () => {
         
         // Fetch regional leaderboard
         const leaderboardResponse = await fetch(
-          'http://localhost:3001/api/mlm/regional/leaderboard'
+          'https://aaaogo.xyz/api/mlm/regional/leaderboard'
         );
         const leaderboardResult = await leaderboardResponse.json();
         
         // Fetch global ambassadors
         const ambassadorsResponse = await fetch(
-          'http://localhost:3001/api/mlm/regional/global-ambassadors?page=1&limit=20'
+          'https://aaaogo.xyz/api/mlm/regional/global-ambassadors?page=1&limit=20'
         );
         const ambassadorsResult = await ambassadorsResponse.json();
 

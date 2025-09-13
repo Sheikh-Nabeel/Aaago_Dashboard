@@ -2,7 +2,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Define the base URL directly
-const API_BASE_URL = "https://aaaogo.xyz/api"; // Update to your production URL for deployment
+const API_BASE_URL = "http://localhost:3001/api"; // Update to your production URL for deployment
 
 export const apiSlice = createApi({
   reducerPath: "api",
@@ -61,6 +61,17 @@ export const apiSlice = createApi({
         return response;
       },
     }),
+    getPendingApprovalsEarnings: builder.query({
+      query: () => ({
+        url: `/mlm/pending-approvals-earnings/`,
+        method: "GET",
+      }),
+      providesTags: ["PendingKYCs", "User"],
+      transformResponse: (response) => {
+        console.log('getPendingApprovalsEarnings Response:', response);
+        return response?.data || response;
+      },
+    }),
   }),
 });
 
@@ -69,5 +80,6 @@ export const {
   useGetPendingKYCsQuery, 
   useApproveKycMutation, 
   useRejectKycMutation,
-  useGetCurrentUserQuery 
+  useGetCurrentUserQuery,
+  useGetPendingApprovalsEarningsQuery
 } = apiSlice;

@@ -6,7 +6,7 @@ import { FiUserCheck } from "react-icons/fi";
 import { FaMoneyBillWave } from "react-icons/fa";
 // import { useGetPendingKYCsQuery } from "../features/service/apiSlice";
 import { useSelector } from "react-redux";
-import { useGetPendingKYCsQuery } from "../../features/service/apiSlice";
+import { useGetPendingApprovalsEarningsQuery } from "../../features/service/apiSlice";
 
 const data = [
   {
@@ -41,11 +41,15 @@ const Detail = () => {
     data: pendingKYCs,
     isLoading,
     error,
-  } = useGetPendingKYCsQuery(undefined, {
-    skip: !isAuthenticated || !user || user.role !== "admin", // Skip query if not admin
+  } = useGetPendingApprovalsEarningsQuery(undefined, {
+    skip: !isAuthenticated, // Skip query if not authenticated
   });
 
-  // Update the Pending Approvals data with the fetched total
+  // Debug logging
+  console.log('Auth state:', { isAuthenticated, user });
+  console.log('API state:', { pendingKYCs, isLoading, error });
+
+  // Update the data with the fetched values
   const updatedData = data.map((item) => {
     if (item.total === "Pending Approvals") {
       return {
@@ -53,8 +57,18 @@ const Detail = () => {
         percent: isLoading
           ? "Loading..."
           : error
-          ? "Error"
-          : pendingKYCs?.totalPending || "0",
+          ? `Error: ${error?.message || 'Unknown'}`
+          : pendingKYCs?.pendingApprovals?.pendingKYCCount || pendingKYCs?.pendingKYCCount || JSON.stringify(pendingKYCs) || "0",
+      };
+    }
+    if (item.total === "Total Revenue") {
+      return {
+        ...item,
+        percent: isLoading
+          ? "Loading..."
+          : error
+          ? `Error: ${error?.message || 'Unknown'}`
+          : pendingKYCs?.mlmEarnings?.totalEarnings || pendingKYCs?.totalEarnings || "0",
       };
     }
     return item;

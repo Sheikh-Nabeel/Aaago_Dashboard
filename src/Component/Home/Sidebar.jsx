@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LuLayoutDashboard } from 'react-icons/lu';
 import { FaSitemap, FaTruck, FaHandHolding, FaBriefcase, FaUserTie } from 'react-icons/fa';
-import { MdVerifiedUser, MdRequestPage, MdOutlineIndeterminateCheckBox } from 'react-icons/md';
+import { MdVerifiedUser, MdRequestPage, MdOutlineIndeterminateCheckBox, MdSupportAgent } from 'react-icons/md';
 import { Link, useLocation } from 'react-router-dom';
 import { TbMessageDots } from 'react-icons/tb';
 import { PiUserFocus } from 'react-icons/pi';
@@ -20,7 +20,7 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchUserPermissions = async () => {
       try {
-        const response = await axios.get('https://aaaogo.xyz/api/user/me', {
+        const response = await axios.get('http://localhost:3001/api/user/me', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPermissions(response.data.user.adminPermissions || []);
@@ -64,6 +64,7 @@ const Sidebar = () => {
     { path: '/kycverification', name: 'Admin Approvals', icon: <FiUserCheck size={20} />, permission: 'kycverification' },
     { path: '/reportanalytics', name: 'Reports', icon: <PiUserFocus size={25} />, permission: 'reportanalytics' },
     { path: '/reviewandrating', name: 'Rating & Reviews', icon: <CiBookmarkPlus size={25} />, permission: 'reviewandrating' },
+    { path: '/customersupport', name: 'Customer Support', icon: <MdSupportAgent size={20} />, permission: 'customersupport' },
     { path: '/adminmanagement', name: 'Admin Management', icon: <FaUserShield size={20} />, permission: 'adminmanagement' },
   ];
 

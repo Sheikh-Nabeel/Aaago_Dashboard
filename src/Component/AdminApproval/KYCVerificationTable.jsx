@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import Sidebar from '../Home/Sidebar';
 import AdminApprovalNav from './AdminApprovalNav';
+import ConfirmationModal from '../Common/ConfirmationModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { useGetPendingKYCsQuery, apiSlice } from '../../features/service/apiSlice';
 
-const IMAGE_BASE_URL = 'https://aaaogo.xyz';
+const IMAGE_BASE_URL = 'http://localhost:3001';
 
 const KYCVerificationTable = () => {
   const dispatch = useDispatch();
@@ -13,6 +15,8 @@ const KYCVerificationTable = () => {
   const [sortBy, setSortBy] = useState('Pending');
   const [roleFilter, setRoleFilter] = useState('All');
   const [selectedKyc, setSelectedKyc] = useState(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectUserId, setRejectUserId] = useState(null);
 
   const { data: kycDataResponse, isLoading, isError, error } = useGetPendingKYCsQuery();
   const kycData = kycDataResponse?.kycDetails || [];
@@ -20,20 +24,23 @@ const KYCVerificationTable = () => {
   const handleApprove = async (userId, kycLevel) => {
     try {
       await dispatch(apiSlice.endpoints.approveKyc.initiate({ userId })).unwrap();
-      alert(`KYC Level ${kycLevel} approved successfully`);
+      toast.success(`KYC Level ${kycLevel} approved successfully`);
     } catch (err) {
-      alert(err.data?.message || 'Failed to approve KYC');
+      toast.error(err.data?.message || 'Failed to approve KYC');
     }
   };
 
-  const handleReject = async (userId) => {
+  const handleReject = (userId) => {
+    setRejectUserId(userId);
+    setShowRejectModal(true);
+  };
+
+  const confirmReject = async (reason) => {
     try {
-      const reason = prompt('Enter reason for rejection:');
-      if (!reason) return;
-      await dispatch(apiSlice.endpoints.rejectKyc.initiate({ userId, reason })).unwrap();
-      alert('KYC rejected successfully');
+      await dispatch(apiSlice.endpoints.rejectKyc.initiate({ userId: rejectUserId, reason })).unwrap();
+      toast.success('KYC rejected successfully');
     } catch (err) {
-      alert(err.data?.message || 'Failed to reject KYC');
+      toast.error(err.data?.message || 'Failed to reject KYC');
     }
   };
 
@@ -370,6 +377,16 @@ const KYCVerificationTable = () => {
             </div>
           </div>
         )}
+        
+        <ConfirmationModal
+          isOpen={showRejectModal}
+          onClose={() => setShowRejectModal(false)}
+          onConfirm={confirmReject}
+          title="Reject KYC"
+          message="Please provide a reason for rejecting this KYC:"
+          showInput={true}
+          inputPlaceholder="Enter reason for rejection..."
+        />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://aaaogo.xyz/api/vehicle-hiring'; // Adjust base URL as per your backend setup
+const API_URL = 'http://localhost:3001/api/vehicle-hiring'; // Adjust base URL as per your backend setup
 
 
 // Get all driver hirings

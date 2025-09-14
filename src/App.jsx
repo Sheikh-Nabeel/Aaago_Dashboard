@@ -4,8 +4,7 @@ import { useDispatch } from 'react-redux';
 import { checkTokenValidity } from './features/slice/authSlice';
 import ProtectedRoute from './Component/ProtectedRoute';
 import tokenRefreshService from './services/tokenRefreshService';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'react-hot-toast';
 import Navbar from './Component/Navbar';
 import Notifications from './Component/Notifications';
 import Dispatch from './Component/DispatchCenter/Dispatch';
@@ -70,6 +69,7 @@ import CustomReportTable from './Component/Reports/CustomReportGenerator/CustomR
 import CustomerReferralTree from './Component/CustomerManagement/CustomerReferralTree';
 import Login from './Component/login/Login';
 import AdminManagement from './Component/Add admin/AdminManagement';
+import CustomerSupport from './Component/CustomerSupport/CustomerSupport';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -78,17 +78,28 @@ const Layout = ({ children }) => {
     <div className="bg-[#013220] text-[#DDC104] min-h-screen">
       {!hideNavbar && <Navbar />}
       <div className="min-h-screen">{children}</div>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: '#1f2937',
+            color: '#ffffff',
+            border: '1px solid #374151',
+          },
+          success: {
+            style: {
+              background: '#065f46',
+              color: '#ffffff',
+            },
+          },
+          error: {
+            style: {
+              background: '#7f1d1d',
+              color: '#ffffff',
+            },
+          },
+        }}
       />
     </div>
   );
@@ -126,6 +137,7 @@ const AppRoutes = () => {
         <Route path="/chatdetail" element={<ProtectedRoute><ChatDetail /></ProtectedRoute>} />
         <Route path="/dispatch" element={<ProtectedRoute><Dispatch /></ProtectedRoute>} />
         <Route path="/livelocation" element={<ProtectedRoute><Livelocation /></ProtectedRoute>} />
+        <Route path="/customersupport" element={<ProtectedRoute><CustomerSupport /></ProtectedRoute>} />
         <Route path="/adminmanagement" element={<ProtectedRoute><AdminManagement /></ProtectedRoute>} />
         <Route path="/drivermanagement" element={<ProtectedRoute><DriverManagement /></ProtectedRoute>} />
         <Route path="/driverprofile" element={<ProtectedRoute><DriverProfile /></ProtectedRoute>} />

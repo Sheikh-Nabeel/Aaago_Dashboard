@@ -5,6 +5,7 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { IoIosArrowDown } from 'react-icons/io';
 import { fetchAllUsers, editUser, deleteUser, resetUserState } from '../../features/users/userSlice';
 import Sidebar from '../Home/Sidebar';
+import ConfirmationModal from '../Common/ConfirmationModal';
 
 const CustomerManagement = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,8 @@ const CustomerManagement = () => {
     hasVehicle: '',
   });
   const [formErrors, setFormErrors] = useState({});
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState(null);
 
   useEffect(() => {
     console.log('Fetching all customers');
@@ -119,18 +122,30 @@ const CustomerManagement = () => {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
-      console.log('Initiating delete for userId:', userId);
-      setDeletingUserId(userId);
+  const handleDeleteUser = (userId) => {
+    setCustomerToDelete(userId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteCustomer = async () => {
+    if (customerToDelete) {
+      console.log('Initiating delete for userId:', customerToDelete);
+      setDeletingUserId(customerToDelete);
       try {
-        await dispatch(deleteUser(userId)).unwrap();
-        console.log('Delete customer successful:', userId);
+        await dispatch(deleteUser(customerToDelete)).unwrap();
+        console.log('Delete customer successful:', customerToDelete);
       } catch (error) {
         console.error('Delete customer failed:', error);
         setDeletingUserId(null);
       }
     }
+    setShowDeleteConfirmation(false);
+    setCustomerToDelete(null);
+  };
+
+  const cancelDeleteCustomer = () => {
+    setShowDeleteConfirmation(false);
+    setCustomerToDelete(null);
   };
 
   const filteredUsers = users.filter((user) => {
@@ -142,7 +157,7 @@ const CustomerManagement = () => {
   console.log('Rendering with customers:', filteredUsers.map(u => u._id), 'updateKey:', updateKey);
 
   // Base URL for images
-  const BASE_URL = 'https://aaaogo.xyz/';
+  const BASE_URL = 'http://localhost:3001/';
 
   return (
     <div className="flex min-h-screen bg-[#013220] text-[#DDC104] font-sans">
@@ -556,6 +571,15 @@ const CustomerManagement = () => {
           )}
         </div>
       </div>
+      
+      <ConfirmationModal
+        isOpen={showDeleteConfirmation}
+        title="Delete Customer"
+        message="Are you sure you want to delete this customer? This action cannot be undone."
+        onConfirm={confirmDeleteCustomer}
+        onClose={cancelDeleteCustomer}
+      />
+      
       <style jsx>{`
         .no-scrollbar {
           scrollbar-width: none; /* Firefox */

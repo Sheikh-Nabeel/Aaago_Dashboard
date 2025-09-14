@@ -45,9 +45,7 @@ const Detail = () => {
     skip: !isAuthenticated, // Skip query if not authenticated
   });
 
-  // Debug logging
-  console.log('Auth state:', { isAuthenticated, user });
-  console.log('API state:', { pendingKYCs, isLoading, error });
+ 
 
   // Update the data with the fetched values
   const updatedData = data.map((item) => {
@@ -58,17 +56,18 @@ const Detail = () => {
           ? "Loading..."
           : error
           ? `Error: ${error?.message || 'Unknown'}`
-          : pendingKYCs?.pendingApprovals?.pendingKYCCount || pendingKYCs?.pendingKYCCount || JSON.stringify(pendingKYCs) || "0",
+          : pendingKYCs?.pendingApprovals?.serviceProviderApprovals?.totalPending || pendingKYCs?.pendingApprovals?.totalPendingRequests || "0",
       };
     }
     if (item.total === "Total Revenue") {
+      console.log('Total Revenue Data:', pendingKYCs?.systemTotalEarnings);
       return {
         ...item,
         percent: isLoading
           ? "Loading..."
           : error
           ? `Error: ${error?.message || 'Unknown'}`
-          : pendingKYCs?.mlmEarnings?.totalEarnings || pendingKYCs?.totalEarnings || "0",
+          : pendingKYCs?.systemTotalEarnings?.totalMLMAmount || "0",
       };
     }
     return item;

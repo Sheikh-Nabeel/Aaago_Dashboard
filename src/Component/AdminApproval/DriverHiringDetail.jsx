@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { IoArrowUndoOutline } from 'react-icons/io5';
+import toast from 'react-hot-toast';
 import Sidebar from '../Home/Sidebar';
 import AdminApprovalNav from './AdminApprovalNav';
 import {
@@ -75,7 +76,7 @@ const DriverHiringDetail = () => {
   const handleApprove = () => {
     if (!token || !driverHiringId) {
       console.error('Missing token or driverHiringId:', { token, driverHiringId });
-      alert('Authentication or hiring ID missing');
+      toast.error('Authentication or hiring ID missing');
       return;
     }
     console.log('Approving hiring:', driverHiringId);
@@ -87,12 +88,12 @@ const DriverHiringDetail = () => {
 
   const handleReject = () => {
     if (!reason.trim()) {
-      alert('Please provide a reason for rejection');
+      toast.error('Please provide a reason for rejection');
       return;
     }
     if (!token || !driverHiringId) {
       console.error('Missing token or driverHiringId:', { token, driverHiringId });
-      alert('Authentication or hiring ID missing');
+      toast.error('Authentication or hiring ID missing');
       return;
     }
     console.log('Rejecting hiring:', driverHiringId, 'Reason:', reason);
@@ -108,12 +109,12 @@ const DriverHiringDetail = () => {
 
   const handleUpdateTerms = () => {
     if (!newTerms.trim()) {
-      alert('Please provide new terms');
+      toast.error('Please provide new terms');
       return;
     }
     if (!token || !driverHiringId) {
       console.error('Missing token or driverHiringId:', { token, driverHiringId });
-      alert('Authentication or hiring ID missing');
+      toast.error('Authentication or hiring ID missing');
       return;
     }
     console.log('Updating terms for hiring:', driverHiringId, 'Terms:', newTerms);
@@ -129,12 +130,12 @@ const DriverHiringDetail = () => {
 
   const handleAddNote = () => {
     if (!newNote.trim()) {
-      alert('Please provide a note');
+      toast.error('Please provide a note');
       return;
     }
     if (!token || !driverHiringId) {
       console.error('Missing token or driverHiringId:', { token, driverHiringId });
-      alert('Authentication or hiring ID missing');
+      toast.error('Authentication or hiring ID missing');
       return;
     }
     console.log('Adding note for hiring:', driverHiringId, 'Note:', newNote);

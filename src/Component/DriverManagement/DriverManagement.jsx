@@ -5,6 +5,7 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { IoIosArrowDown } from 'react-icons/io';
 import { fetchAllDrivers, editDriver, deleteUser, resetUserState } from '../../features/users/userSlice';
 import Sidebar from '../Home/Sidebar';
+import ConfirmationModal from '../Common/ConfirmationModal';
 
 const DriverManagement = () => {
   const dispatch = useDispatch();
@@ -62,6 +63,8 @@ const DriverManagement = () => {
     insuranceCertificate: null,
     vehicleImages: [],
   });
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [driverToDelete, setDriverToDelete] = useState(null);
 
   useEffect(() => {
     console.log('Fetching all drivers');
@@ -249,18 +252,30 @@ const DriverManagement = () => {
     }
   };
 
-  const handleDeleteDriver = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this driver? This action cannot be undone.')) {
-      console.log('Initiating delete for userId:', userId);
-      setDeletingDriverId(userId);
+  const handleDeleteDriver = (userId) => {
+    setDriverToDelete(userId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteDriver = async () => {
+    if (driverToDelete) {
+      console.log('Initiating delete for userId:', driverToDelete);
+      setDeletingDriverId(driverToDelete);
       try {
-        await dispatch(deleteUser(userId)).unwrap();
-        console.log('Delete driver successful:', userId);
+        await dispatch(deleteUser(driverToDelete)).unwrap();
+        console.log('Delete driver successful:', driverToDelete);
       } catch (error) {
         console.error('Delete driver failed:', error);
         setDeletingDriverId(null);
       }
     }
+    setShowDeleteConfirmation(false);
+    setDriverToDelete(null);
+  };
+
+  const cancelDeleteDriver = () => {
+    setShowDeleteConfirmation(false);
+    setDriverToDelete(null);
   };
 
   const filteredDrivers = drivers.filter((driver) => {
@@ -271,7 +286,7 @@ const DriverManagement = () => {
 
   console.log('Rendering with drivers:', filteredDrivers.map(d => d._id), 'updateKey:', updateKey);
 
-  const BASE_URL = 'https://aaaogo.xyz/';
+  const BASE_URL = 'http://localhost:3001/';
 
   return (
     <div className="flex min-h-screen bg-[#013220] text-[#DDC104] font-sans">
@@ -1176,6 +1191,14 @@ const DriverManagement = () => {
           )}
         </div>
       </div>
+      
+      <ConfirmationModal
+        isOpen={showDeleteConfirmation}
+        title="Delete Driver"
+        message="Are you sure you want to delete this driver? This action cannot be undone."
+        onConfirm={confirmDeleteDriver}
+        onClose={cancelDeleteDriver}
+      />
     </div>
   );
 };

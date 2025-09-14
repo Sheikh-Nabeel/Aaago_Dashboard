@@ -5,7 +5,7 @@ export const fetchServices = createAsyncThunk(
   'services/fetchServices',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('https://aaaogo.xyz/api/user/services', {
+      const response = await axios.get('http://localhost:3001/api/user/services', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       return response.data.services;
@@ -20,7 +20,7 @@ export const approveService = createAsyncThunk(
   async (serviceId, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `https://aaaogo.xyz/api/user/services/approve/${serviceId}`,
+        `http://localhost:3001/api/user/services/approve/${serviceId}`,
         {},
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
@@ -36,7 +36,7 @@ export const rejectService = createAsyncThunk(
   async ({ serviceId, reason }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `https://aaaogo.xyz/api/user/services/reject/${serviceId}`,
+        `http://localhost:3001/api/user/services/reject/${serviceId}`,
         { reason },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

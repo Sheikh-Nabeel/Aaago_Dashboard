@@ -10,11 +10,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/slice/authSlice';
 import { useGetCurrentUserQuery } from '../features/service/apiSlice';
 import { apiSlice } from '../features/service/apiSlice'; // Import apiSlice to invalidate cache
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import axiosInstance from '../services/axiosConfig';
 
 // Define the base URL for images (without /api)
-const IMAGE_BASE_URL = "https://aaaogo.xyz";
+const IMAGE_BASE_URL = "http://localhost:3001";
 
 const Navbar = () => {
   const location = useLocation();

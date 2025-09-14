@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify"; // Import toast
+import toast from "react-hot-toast"; // Import toast
 import CrrLineChart from "./CrrLineChart";
 import CrrTeamStructureChart from "./CrrTeamStructureChart";
 
@@ -16,7 +16,7 @@ const MlmCrr = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch("https://aaaogo.xyz/api/mlm/crr/leaderboard");
+        const response = await fetch("http://localhost:3001/api/mlm/crr/leaderboard");
         const result = await response.json();
         if (result.success) {
           setLeaderboardData(result.data.leaderboard);
@@ -36,7 +36,7 @@ const MlmCrr = () => {
   useEffect(() => {
     const fetchCrrConfig = async () => {
       try {
-        const response = await fetch("https://aaaogo.xyz/api/mlm/admin/crr/config");
+        const response = await fetch("http://localhost:3001/api/mlm/admin/crr/config");
         const result = await response.json();
         if (result.success) {
           setCrrConfigData(result.data);
@@ -70,7 +70,7 @@ const MlmCrr = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://aaaogo.xyz/api/mlm/admin/crr/config", {
+      const response = await fetch("http://localhost:3001/api/mlm/admin/crr/config", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

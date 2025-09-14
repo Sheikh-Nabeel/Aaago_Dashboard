@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import toast from "react-hot-toast";
+import ConfirmationModal from '../Common/ConfirmationModal';
 
 const AdminManagement = () => {
   const [admins, setAdmins] = useState([]);
@@ -15,6 +15,8 @@ const AdminManagement = () => {
   });
   const [editingAdmin, setEditingAdmin] = useState(null);
   const [errors, setErrors] = useState({});
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [adminToDelete, setAdminToDelete] = useState(null);
   const availablePermissions = [
     "home",
     "mlm",
@@ -38,7 +40,7 @@ const AdminManagement = () => {
   const fetchAdmins = async () => {
     try {
       const response = await axios.get(
-        "https://aaaogo.xyz/api/user/admins",
+        "http://localhost:3001/api/user/admins",
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -101,7 +103,7 @@ const AdminManagement = () => {
 
     try {
       const response = await axios.post(
-        "https://aaaogo.xyz/api/user/admin/add-admin",
+        "http://localhost:3001/api/user/admin/add-admin",
         newAdmin,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -136,7 +138,7 @@ const AdminManagement = () => {
 
     try {
       await axios.put(
-        `https://aaaogo.xyz/api/user/admin/edit-admin/${editingAdmin._id}`,
+        `http://localhost:3001/api/user/admin/edit-admin/${editingAdmin._id}`,
         editingAdmin,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -153,11 +155,16 @@ const AdminManagement = () => {
     }
   };
 
-  const handleDeleteAdmin = async (adminId) => {
-    if (window.confirm("Are you sure you want to delete this admin?")) {
+  const handleDeleteAdmin = (adminId) => {
+    setAdminToDelete(adminId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteAdmin = async () => {
+    if (adminToDelete) {
       try {
         await axios.delete(
-          `https://aaaogo.xyz/api/user/admin/delete-admin/${adminId}`,
+          `http://localhost:3001/api/user/admin/delete-admin/${adminToDelete}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -170,6 +177,13 @@ const AdminManagement = () => {
         toast.error(error.response?.data?.message || "Failed to delete admin");
       }
     }
+    setShowDeleteConfirmation(false);
+    setAdminToDelete(null);
+  };
+
+  const cancelDeleteAdmin = () => {
+    setShowDeleteConfirmation(false);
+    setAdminToDelete(null);
   };
 
   return (
@@ -355,6 +369,14 @@ const AdminManagement = () => {
           </div>
         )}
       </div>
+      
+      <ConfirmationModal
+        isOpen={showDeleteConfirmation}
+        title="Delete Admin"
+        message="Are you sure you want to delete this admin? This action cannot be undone."
+        onConfirm={confirmDeleteAdmin}
+        onClose={cancelDeleteAdmin}
+      />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 
 const MlmHlr = () => {
   const [leaderboardData, setLeaderboardData] = useState(null);
@@ -25,7 +25,7 @@ const MlmHlr = () => {
   // Fetch HLR configuration
   const fetchHlrConfig = async () => {
     try {
-      const response = await fetch('https://aaaogo.xyz/api/mlm/admin/hlr/config');
+      const response = await fetch('http://localhost:3001/api/mlm/admin/hlr/config');
       if (response.ok) {
         const json = await response.json();
         if (json.success && json.data) {
@@ -78,7 +78,7 @@ const MlmHlr = () => {
         return;
       }
       
-      const response = await fetch('https://aaaogo.xyz/api/mlm/admin/hlr/config', {
+      const response = await fetch('http://localhost:3001/api/mlm/admin/hlr/config', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ const MlmHlr = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch('https://aaaogo.xyz/api/mlm/hlr/leaderboard?page=1&limit=20');
+        const response = await fetch('http://localhost:3001/api/mlm/hlr/leaderboard?page=1&limit=20');
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard data');
         }

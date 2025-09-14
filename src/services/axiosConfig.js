@@ -5,7 +5,7 @@ import { isTokenValid, getTokenExpirationTime } from '../utils/tokenUtils';
 
 // Create axios instance
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: 'https://aaaogo.xyz/api',
   timeout: 10000,
 });
 

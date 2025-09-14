@@ -20,7 +20,7 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchUserPermissions = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/user/me', {
+        const response = await axios.get('https://aaaogo.xyz/api/user/me', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPermissions(response.data.user.adminPermissions || []);

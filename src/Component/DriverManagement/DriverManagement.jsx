@@ -286,7 +286,7 @@ const DriverManagement = () => {
 
   console.log('Rendering with drivers:', filteredDrivers.map(d => d._id), 'updateKey:', updateKey);
 
-  const BASE_URL = 'http://localhost:3001/';
+  const BASE_URL = 'https://aaaogo.xyz/';
 
   return (
     <div className="flex min-h-screen bg-[#013220] text-[#DDC104] font-sans">

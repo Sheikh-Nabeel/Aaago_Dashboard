@@ -97,7 +97,7 @@ const CustomerSupport = () => {
   const fetchTickets = async (page = pagination.currentPage, resetPage = false) => {
     try {
       setLoading(true);
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const currentPage = resetPage ? 1 : page;
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -130,7 +130,7 @@ const CustomerSupport = () => {
 
   const escalateTicket = async (ticketId, escalateTo, reason) => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.patch(`${baseUrl}/support/tickets/${ticketId}/escalate`, {
         escalateTo,
         reason
@@ -151,7 +151,7 @@ const CustomerSupport = () => {
 
   const fetchAdminsAndSuperadmins = async () => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.get(`${baseUrl}/user/admins-and-superadmins`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -201,7 +201,7 @@ const CustomerSupport = () => {
   const fetchEscalatedTickets = async (page = 1, limit = 10, priority = '', category = '', sortOrder = 'desc') => {
     try {
       setLoading(true);
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -231,7 +231,7 @@ const CustomerSupport = () => {
 
   const fetchTicketDetails = async (ticketId) => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.get(`${baseUrl}/support/tickets/${ticketId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -251,7 +251,7 @@ const CustomerSupport = () => {
 
   const updateTicketStatus = async (ticketId, status, internalNote = '') => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.patch(`${baseUrl}/support/tickets/${ticketId}/status`, {
         status,
         internalNote
@@ -284,7 +284,7 @@ const CustomerSupport = () => {
 
   const updateTicketPriority = async (ticketId, priority, reason = '') => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.patch(`${baseUrl}/support/tickets/${ticketId}/priority`, {
         priority,
         reason
@@ -317,7 +317,7 @@ const CustomerSupport = () => {
 
   const assignTicket = async (ticketId, assignedTo, internalNote = '') => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.patch(`${baseUrl}/support/tickets/${ticketId}/assign`, {
         agentId: assignedTo,
         internalNote
@@ -344,7 +344,7 @@ const CustomerSupport = () => {
 
   const addTicketResponse = async (ticketId, message, isInternal = false) => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.post(`${baseUrl}/support/tickets/${ticketId}/responses`, {
         message,
         isInternal
@@ -369,7 +369,7 @@ const CustomerSupport = () => {
 
   const fetchTicketStatistics = async () => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.get(`${baseUrl}/support/statistics`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -387,7 +387,7 @@ const CustomerSupport = () => {
 
   const fetchAgents = async () => {
     try {
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       // Assuming there's an endpoint to get agents/admins
       const response = await axios.get(`${baseUrl}/users/agents`, {
         headers: {
@@ -412,7 +412,7 @@ const CustomerSupport = () => {
   const fetchAssignedTickets = async (page = 1) => {
     try {
       setLoading(true);
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.get(`${baseUrl}/support/my-assigned-tickets?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -436,7 +436,7 @@ const CustomerSupport = () => {
   const fetchUnassignedTickets = async (page = 1) => {
     try {
       setLoading(true);
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.get(`${baseUrl}/support/unassigned-tickets?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -460,7 +460,7 @@ const CustomerSupport = () => {
   const fetchTicketResponses = async (ticketId, page = 1) => {
     try {
       setResponsesLoading(true);
-      const baseUrl = 'http://localhost:3001/api';
+      const baseUrl = 'https://aaaogo.xyz/api';
       const response = await axios.get(`${baseUrl}/support/tickets/${ticketId}/responses?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`

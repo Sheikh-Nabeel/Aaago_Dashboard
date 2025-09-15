@@ -31,7 +31,7 @@ const MlmBbr = () => {
         setLoading(true);
 
         // Fetch campaign data
-        const campaignResponse = await fetch('https://aaaogo.xyz/api/mlm/bbr/campaign');
+        const campaignResponse = await fetch('http://localhost:3001/api/mlm/bbr/campaign');
         if (!campaignResponse.ok) {
           throw new Error(`Failed to fetch campaign data: ${campaignResponse.status} ${campaignResponse.statusText}`);
         }
@@ -47,7 +47,7 @@ const MlmBbr = () => {
         setCampaignData(campaignJson.data?.currentCampaign || null);
 
         // Fetch leaderboard data
-        const leaderboardResponse = await fetch('https://aaaogo.xyz/api/mlm/bbr/leaderboard');
+        const leaderboardResponse = await fetch('http://localhost:3001/api/mlm/bbr/leaderboard');
         if (!leaderboardResponse.ok) {
           throw new Error(`Failed to fetch leaderboard data: ${leaderboardResponse.status} ${leaderboardResponse.statusText}`);
         }
@@ -93,7 +93,7 @@ const MlmBbr = () => {
     }
 
     try {
-      const url = 'https://aaaogo.xyz/api/mlm/admin/bbr/campaign';
+      const url = 'http://localhost:3001/api/mlm/admin/bbr/campaign';
       const method = isEditing ? 'PUT' : 'POST';
       const response = await fetch(url, {
         method,
@@ -133,7 +133,7 @@ const MlmBbr = () => {
       setIsEditing(false);
 
       // Refetch campaign data to update the UI
-      const refetchResponse = await fetch('https://aaaogo.xyz/api/mlm/bbr/campaign');
+      const refetchResponse = await fetch('http://localhost:3001/api/mlm/bbr/campaign');
       if (refetchResponse.ok) {
         const refetchJson = await refetchResponse.json();
         console.log('Refetched Campaign Data:', refetchJson);
@@ -168,7 +168,7 @@ const MlmBbr = () => {
     if (!campaignData) return;
 
     try {
-      const response = await fetch('https://aaaogo.xyz/api/mlm/admin/bbr/campaign', {
+      const response = await fetch('http://localhost:3001/api/mlm/admin/bbr/campaign', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

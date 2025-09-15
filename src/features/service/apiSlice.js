@@ -2,7 +2,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Define the base URL directly
-const API_BASE_URL = "https://aaaogo.xyz/api"; // Update to your production URL for deployment
+const API_BASE_URL = "http://localhost:3001/api"; // Update to your production URL for deployment
 
 export const apiSlice = createApi({
   reducerPath: "api",

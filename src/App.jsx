@@ -18,6 +18,7 @@ import CustomerEarningPayout from './Component/CustomerManagement/CustomerEarnin
 import CustomerRatings from './Component/CustomerManagement/CustomerRating';
 import CustomerMLM from './Component/CustomerManagement/CustomerMLM';
 import CustomerComplain from './Component/CustomerManagement/CustomerComplain';
+import WebsiteUser from './Component/WebsiteUser/WebsiteUser';
 import ProposalManagement from './Component/CareerManagment/ProposalManagement';
 import AgreementRecord from './Component/CareerManagment/AgreementsRecord';
 import MarketPlaceControl from './Component/CareerManagment/MarketPlaceControl';
@@ -138,6 +139,7 @@ const AppRoutes = () => {
         <Route path="/dispatch" element={<ProtectedRoute><Dispatch /></ProtectedRoute>} />
         <Route path="/livelocation" element={<ProtectedRoute><Livelocation /></ProtectedRoute>} />
         <Route path="/customersupport" element={<ProtectedRoute><CustomerSupport /></ProtectedRoute>} />
+        <Route path="/websiteuser" element={<ProtectedRoute><WebsiteUser /></ProtectedRoute>} />
         <Route path="/adminmanagement" element={<ProtectedRoute><AdminManagement /></ProtectedRoute>} />
         <Route path="/drivermanagement" element={<ProtectedRoute><DriverManagement /></ProtectedRoute>} />
         <Route path="/driverprofile" element={<ProtectedRoute><DriverProfile /></ProtectedRoute>} />

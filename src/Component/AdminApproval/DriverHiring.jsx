@@ -192,7 +192,7 @@ const DriverHiring = () => {
                               <p><strong>Registration Card:</strong></p>
                               <div className="flex gap-4">
                                 <a
-                                  href={`https://aaaogo.xyz/${item.registrationCard.front}`}
+                                  href={`http://localhost:3001/${item.registrationCard.front}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-yellow-400 hover:underline"
@@ -200,7 +200,7 @@ const DriverHiring = () => {
                                   Front
                                 </a>
                                 <a
-                                  href={`https://aaaogo.xyz/${item.registrationCard.back}`}
+                                  href={`http://localhost:3001/${item.registrationCard.back}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-yellow-400 hover:underline"
@@ -213,7 +213,7 @@ const DriverHiring = () => {
                                 {item.vehicleImages.map((img, index) => (
                                   <a
                                     key={index}
-                                    href={`https://aaaogo.xyz/${img}`}
+                                    href={`http://localhost:3001/${img}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-yellow-400 hover:underline"

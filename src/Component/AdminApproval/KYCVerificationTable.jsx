@@ -6,7 +6,7 @@ import ConfirmationModal from '../Common/ConfirmationModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { useGetPendingKYCsQuery, apiSlice } from '../../features/service/apiSlice';
 
-const IMAGE_BASE_URL = 'https://aaaogo.xyz';
+const IMAGE_BASE_URL = 'http://localhost:3001';
 
 const KYCVerificationTable = () => {
   const dispatch = useDispatch();

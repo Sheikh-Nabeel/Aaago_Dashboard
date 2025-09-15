@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LuLayoutDashboard } from 'react-icons/lu';
-import { FaSitemap, FaTruck, FaHandHolding, FaBriefcase, FaUserTie } from 'react-icons/fa';
-import { MdVerifiedUser, MdRequestPage, MdOutlineIndeterminateCheckBox, MdSupportAgent } from 'react-icons/md';
+import { FaSitemap, FaTruck, FaHandHolding, FaBriefcase, FaUserTie, FaUsers } from 'react-icons/fa';
+import { MdVerifiedUser, MdRequestPage, MdOutlineIndeterminateCheckBox } from 'react-icons/md';
 import { Link, useLocation } from 'react-router-dom';
 import { TbMessageDots } from 'react-icons/tb';
 import { PiUserFocus } from 'react-icons/pi';
@@ -20,7 +20,7 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchUserPermissions = async () => {
       try {
-        const response = await axios.get('https://aaaogo.xyz/api/user/me', {
+        const response = await axios.get('http://localhost:3001/api/user/me', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setPermissions(response.data.user.adminPermissions || []);
@@ -45,6 +45,8 @@ const Sidebar = () => {
     { path: '/dispatch', name: 'Dispatch Center', icon: <FaTruck size={20} />, permission: 'dispatch' },
     { path: '/drivermanagement', name: 'Driver Management', icon: <FaUserTie size={20} />, permission: 'drivermanagement' },
     { path: '/customermanagement', name: 'Customer Management', icon: <LiaUserFriendsSolid size={20} />, permission: 'customermanagement' },
+    { path: '/customersupport', name: 'Customer Support', icon: <MdVerifiedUser size={20} />, permission: 'customersupport' },
+    { path: '/websiteuser', name: 'Website User', icon: <FaUsers size={20} />, permission: 'websiteuser' },
     {
       path: '/proposalmanagement',
       name: 'Career Management',
@@ -64,7 +66,6 @@ const Sidebar = () => {
     { path: '/kycverification', name: 'Admin Approvals', icon: <FiUserCheck size={20} />, permission: 'kycverification' },
     { path: '/reportanalytics', name: 'Reports', icon: <PiUserFocus size={25} />, permission: 'reportanalytics' },
     { path: '/reviewandrating', name: 'Rating & Reviews', icon: <CiBookmarkPlus size={25} />, permission: 'reviewandrating' },
-    { path: '/customersupport', name: 'Customer Support', icon: <MdSupportAgent size={20} />, permission: 'customersupport' },
     { path: '/adminmanagement', name: 'Admin Management', icon: <FaUserShield size={20} />, permission: 'adminmanagement' },
   ];
 
@@ -73,15 +74,15 @@ const Sidebar = () => {
   );
 
   return (
-    <div className="sticky top-0 left-0 overflow-y-auto z-10 p-6 flex flex-col gap-12 border-r border-[#546816] min-h-screen">
-      <div className="flex flex-col gap-6 whitespace-nowrap w-64">
+    <div className="sticky top-0 left-0 overflow-y-auto overflow-x-hidden z-10 p-6 flex flex-col gap-12 border-r border-[#546816] min-h-screen">
+      <div className="flex flex-col gap-6 w-64">
         {visibleRoutes.map(route => (
           <Link key={route.path} to={route.path} className={linkClasses(route.path)}>
             {route.icon}
             {route.subtext ? (
-              <p>{route.name} <span className="text-sm">{route.subtext}</span></p>
+              <p className="truncate">{route.name} <span className="text-sm">{route.subtext}</span></p>
             ) : (
-              <span>{route.name}</span>
+              <span className="truncate">{route.name}</span>
             )}
           </Link>
         ))}

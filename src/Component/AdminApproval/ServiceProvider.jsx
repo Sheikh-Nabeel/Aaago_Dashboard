@@ -5,7 +5,7 @@ import AdminApprovalNav from "./AdminApprovalNav";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchServices, approveService, rejectService } from "../../features/service/serviceSlice";
 
-const IMAGE_BASE_URL = 'https://aaaogo.xyz';
+const IMAGE_BASE_URL = 'http://localhost:3001';
 
 const statusIndicator = (status) => {
   let color = "";

@@ -157,7 +157,7 @@ const CustomerManagement = () => {
   console.log('Rendering with customers:', filteredUsers.map(u => u._id), 'updateKey:', updateKey);
 
   // Base URL for images
-  const BASE_URL = 'https://aaaogo.xyz/';
+  const BASE_URL = 'http://localhost:3001/';
 
   return (
     <div className="flex min-h-screen bg-[#013220] text-[#DDC104] font-sans">

@@ -97,7 +97,7 @@ const CustomerSupport = () => {
   const fetchTickets = async (page = pagination.currentPage, resetPage = false) => {
     try {
       setLoading(true);
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const currentPage = resetPage ? 1 : page;
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -106,7 +106,7 @@ const CustomerSupport = () => {
       
       if (filters.priority !== 'all') params.append('priority', filters.priority);
       if (filters.category !== 'all') params.append('category', filters.category);
-      if (filters.search) params.append('search', filters.search);
+      // Remove search from API call - search is now handled locally
       
       const response = await axios.get(`${baseUrl}/support/tickets?${params}`, {
         headers: {
@@ -130,7 +130,7 @@ const CustomerSupport = () => {
 
   const escalateTicket = async (ticketId, escalateTo, reason) => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.patch(`${baseUrl}/support/tickets/${ticketId}/escalate`, {
         escalateTo,
         reason
@@ -151,7 +151,7 @@ const CustomerSupport = () => {
 
   const fetchAdminsAndSuperadmins = async () => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.get(`${baseUrl}/user/admins-and-superadmins`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -171,15 +171,19 @@ const CustomerSupport = () => {
 
   // Filter handlers
   const handleFilterChange = (filterType, value) => {
-    setFilterLoading(true);
     setFilters(prev => ({ ...prev, [filterType]: value }));
-    // Reset to first page when filters change
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
-    // Trigger new API call with updated filters
-    setTimeout(() => {
-      fetchTickets(1, true);
-      setFilterLoading(false);
-    }, 100);
+    
+    // Only trigger API calls for non-search filters
+    if (filterType !== 'search') {
+      setFilterLoading(true);
+      // Reset to first page when filters change
+      setPagination(prev => ({ ...prev, currentPage: 1 }));
+      // Trigger new API call with updated filters
+      setTimeout(() => {
+        fetchTickets(1, true);
+        setFilterLoading(false);
+      }, 100);
+    }
   };
 
   const handleLimitChange = (newLimit) => {
@@ -201,7 +205,7 @@ const CustomerSupport = () => {
   const fetchEscalatedTickets = async (page = 1, limit = 10, priority = '', category = '', sortOrder = 'desc') => {
     try {
       setLoading(true);
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -231,7 +235,7 @@ const CustomerSupport = () => {
 
   const fetchTicketDetails = async (ticketId) => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.get(`${baseUrl}/support/tickets/${ticketId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -251,7 +255,7 @@ const CustomerSupport = () => {
 
   const updateTicketStatus = async (ticketId, status, internalNote = '') => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.patch(`${baseUrl}/support/tickets/${ticketId}/status`, {
         status,
         internalNote
@@ -284,7 +288,7 @@ const CustomerSupport = () => {
 
   const updateTicketPriority = async (ticketId, priority, reason = '') => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.patch(`${baseUrl}/support/tickets/${ticketId}/priority`, {
         priority,
         reason
@@ -317,7 +321,7 @@ const CustomerSupport = () => {
 
   const assignTicket = async (ticketId, assignedTo, internalNote = '') => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.patch(`${baseUrl}/support/tickets/${ticketId}/assign`, {
         agentId: assignedTo,
         internalNote
@@ -344,7 +348,7 @@ const CustomerSupport = () => {
 
   const addTicketResponse = async (ticketId, message, isInternal = false) => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.post(`${baseUrl}/support/tickets/${ticketId}/responses`, {
         message,
         isInternal
@@ -369,7 +373,7 @@ const CustomerSupport = () => {
 
   const fetchTicketStatistics = async () => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.get(`${baseUrl}/support/statistics`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -387,7 +391,7 @@ const CustomerSupport = () => {
 
   const fetchAgents = async () => {
     try {
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       // Assuming there's an endpoint to get agents/admins
       const response = await axios.get(`${baseUrl}/users/agents`, {
         headers: {
@@ -412,7 +416,7 @@ const CustomerSupport = () => {
   const fetchAssignedTickets = async (page = 1) => {
     try {
       setLoading(true);
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.get(`${baseUrl}/support/my-assigned-tickets?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -436,7 +440,7 @@ const CustomerSupport = () => {
   const fetchUnassignedTickets = async (page = 1) => {
     try {
       setLoading(true);
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.get(`${baseUrl}/support/unassigned-tickets?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -460,7 +464,7 @@ const CustomerSupport = () => {
   const fetchTicketResponses = async (ticketId, page = 1) => {
     try {
       setResponsesLoading(true);
-      const baseUrl = 'https://aaaogo.xyz/api';
+      const baseUrl = 'http://localhost:3001/api';
       const response = await axios.get(`${baseUrl}/support/tickets/${ticketId}/responses?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -469,6 +473,7 @@ const CustomerSupport = () => {
       
       if (response.data.success) {
         setTicketResponses(response.data.data.responses);
+        setResponses(response.data.data.responses); // Also set responses for detail modal
         setResponsesPagination(response.data.data.pagination);
       }
     } catch (error) {
@@ -633,7 +638,7 @@ const CustomerSupport = () => {
     fetchUnassignedTickets();
   }, []);
 
-  // Effect to handle filter and pagination changes
+  // Effect to handle filter and pagination changes (excluding search which is handled locally)
   useEffect(() => {
     if (ticketView === 'all') {
       fetchTickets();
@@ -644,7 +649,7 @@ const CustomerSupport = () => {
     } else if (ticketView === 'escalated') {
       fetchEscalatedTickets();
     }
-  }, [filters, pagination.currentPage, pagination.limit, ticketView]);
+  }, [filters.status, filters.priority, filters.category, pagination.currentPage, pagination.limit, ticketView]);
 
   // Helper Functions
   const getPriorityIcon = (priority) => {
@@ -724,25 +729,25 @@ const CustomerSupport = () => {
       />
       <Sidebar />
       
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-3 md:p-6 min-w-0">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8 bg-gradient-to-r from-[#1a4a2e] to-[#2d5a3d] p-6 rounded-xl border border-yellow-400/20 shadow-lg">
-          <div>
-            <h1 className="text-3xl font-bold text-yellow-400">Customer Support</h1>
-            <p className="text-gray-400 mt-1">Manage and track customer tickets efficiently</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 bg-gradient-to-r from-[#1a4a2e] to-[#2d5a3d] p-4 md:p-6 rounded-xl border border-yellow-400/20 shadow-lg">
+          <div className="mb-4 sm:mb-0">
+            <h1 className="text-2xl md:text-3xl font-bold text-yellow-400">Customer Support</h1>
+            <p className="text-gray-400 mt-1 text-sm md:text-base">Manage and track customer tickets efficiently</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 md:gap-3 flex-wrap">
             <button
               onClick={handleShowStatistics}
               disabled={statisticsLoading}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm md:text-base"
             >
-              <BiFilterAlt size={20} />
+              <BiFilterAlt size={16} className="md:w-5 md:h-5" />
               {statisticsLoading ? 'Loading...' : 'Statistics'}
             </button>
             <button
               onClick={refreshCurrentView}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-300 text-[#013220] rounded-lg hover:from-yellow-300 hover:to-yellow-200 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
+              className="flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-yellow-400 to-yellow-300 text-[#013220] rounded-lg hover:from-yellow-300 hover:to-yellow-200 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium text-sm md:text-base"
             >
               <MdRefresh size={20} />
               Refresh
@@ -947,6 +952,8 @@ const CustomerSupport = () => {
                                 onClick={() => {
                                   setSelectedTicket(ticket);
                                   setShowDetailModal(true);
+                                  // Fetch responses for this ticket
+                                  fetchTicketResponses(ticket._id);
                                 }}
                                 className="p-2 text-green-400 hover:text-white hover:bg-green-500 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg border border-green-400/30 hover:border-green-500"
                                 title="Quick Edit"

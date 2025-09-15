@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 import axiosInstance from '../services/axiosConfig';
 
 // Define the base URL for images (without /api)
-const IMAGE_BASE_URL = "https://aaaogo.xyz";
+const IMAGE_BASE_URL = "http://localhost:3001";
 
 const Navbar = () => {
   const location = useLocation();

@@ -99,14 +99,19 @@ const CustomerSupport = () => {
       setLoading(true);
       const baseUrl = 'http://localhost:3001/api';
       const currentPage = resetPage ? 1 : page;
+      
+      // For "All Tickets" tab, use the specific endpoint without filters
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: pagination.limit.toString()
+        limit: 10 // Use limit of 10 as specified in the API
       });
       
-      if (filters.priority !== 'all') params.append('priority', filters.priority);
-      if (filters.category !== 'all') params.append('category', filters.category);
-      // Remove search from API call - search is now handled locally
+      // Only apply filters if we're not in "All Tickets" view or if filters are specifically set
+      if (ticketView !== 'all') {
+        if (filters.status !== 'all') params.append('status', filters.status);
+        if (filters.priority !== 'all') params.append('priority', filters.priority);
+        if (filters.category !== 'all') params.append('category', filters.category);
+      }
       
       const response = await axios.get(`${baseUrl}/support/tickets?${params}`, {
         headers: {
@@ -118,11 +123,12 @@ const CustomerSupport = () => {
         setTickets(response.data.data.tickets);
         setPagination({
           ...response.data.data.pagination,
-          limit: pagination.limit
+          limit: 10 // Ensure pagination uses the same limit
         });
       }
     } catch (error) {
       console.error('Error fetching tickets:', error);
+      toast.error('Failed to fetch tickets');
     } finally {
       setLoading(false);
     }
@@ -202,7 +208,7 @@ const CustomerSupport = () => {
     fetchTickets(newPage);
   };
 
-  const fetchEscalatedTickets = async (page = 1, limit = 10, priority = '', category = '', sortOrder = 'desc') => {
+  const fetchEscalatedTickets = async (page = 1, limit = 10, priority = '', category = '', sortOrder = 'desc', updateMainState = false) => {
     try {
       setLoading(true);
       const baseUrl = 'http://localhost:3001/api';
@@ -223,7 +229,14 @@ const CustomerSupport = () => {
       
       if (response.data.success) {
         setEscalatedTickets(response.data.data.tickets);
-        setEscalatedPagination(response.data.data.pagination);
+        // Update the main tickets state if requested or if we're currently viewing escalated tickets
+        if (updateMainState || ticketView === 'escalated') {
+          setTickets(response.data.data.tickets);
+          setEscalatedPagination(response.data.data.pagination);
+          setPagination(response.data.data.pagination);
+        } else {
+          setEscalatedPagination(response.data.data.pagination);
+        }
       }
     } catch (error) {
       console.error('Error fetching escalated tickets:', error);
@@ -413,7 +426,7 @@ const CustomerSupport = () => {
     }
   };
 
-  const fetchAssignedTickets = async (page = 1) => {
+  const fetchAssignedTickets = async (page = 1, updateMainState = false) => {
     try {
       setLoading(true);
       const baseUrl = 'http://localhost:3001/api';
@@ -425,7 +438,8 @@ const CustomerSupport = () => {
       
       if (response.data.success) {
         setAssignedTickets(response.data.data.tickets);
-        if (ticketView === 'assigned') {
+        // Update the main tickets state if requested or if we're currently viewing assigned tickets
+        if (updateMainState || ticketView === 'assigned') {
           setTickets(response.data.data.tickets);
           setPagination(response.data.data.pagination);
         }
@@ -437,7 +451,7 @@ const CustomerSupport = () => {
     }
   };
 
-  const fetchUnassignedTickets = async (page = 1) => {
+  const fetchUnassignedTickets = async (page = 1, updateMainState = false) => {
     try {
       setLoading(true);
       const baseUrl = 'http://localhost:3001/api';
@@ -449,7 +463,8 @@ const CustomerSupport = () => {
       
       if (response.data.success) {
         setUnassignedTickets(response.data.data.tickets);
-        if (ticketView === 'unassigned') {
+        // Update the main tickets state if requested or if we're currently viewing unassigned tickets
+        if (updateMainState || ticketView === 'unassigned') {
           setTickets(response.data.data.tickets);
           setPagination(response.data.data.pagination);
         }
@@ -585,34 +600,26 @@ const CustomerSupport = () => {
 
   const handleTicketViewChange = (view) => {
     setTicketView(view);
+    // Clear tickets state first to prevent showing stale data
+    setTickets([]);
+    setLoading(true);
+    
+    // Always fetch fresh data when switching tabs to ensure correct display
     switch (view) {
       case 'all':
-        fetchTickets();
+        fetchTickets(1, true); // Reset to page 1 and force fresh fetch
         break;
       case 'assigned':
-        if (assignedTickets.length > 0) {
-          setTickets(assignedTickets);
-        } else {
-          fetchAssignedTickets();
-        }
+        fetchAssignedTickets(1, true); // Force update main state
         break;
       case 'unassigned':
-        if (unassignedTickets.length > 0) {
-          setTickets(unassignedTickets);
-        } else {
-          fetchUnassignedTickets();
-        }
+        fetchUnassignedTickets(1, true); // Force update main state
         break;
       case 'escalated':
-        if (escalatedTickets.length > 0) {
-          setTickets(escalatedTickets);
-          setPagination(escalatedPagination);
-        } else {
-          fetchEscalatedTickets();
-        }
+        fetchEscalatedTickets(1, 10, '', '', 'desc', true); // Force update main state
         break;
       default:
-        fetchTickets();
+        fetchTickets(1, true); // Reset to page 1 and force fresh fetch
     }
   };
 
@@ -633,9 +640,8 @@ const CustomerSupport = () => {
   };
 
   useEffect(() => {
+    // Only fetch data for the default view on initial load
     fetchTickets();
-    fetchAssignedTickets();
-    fetchUnassignedTickets();
   }, []);
 
   // Effect to handle filter and pagination changes (excluding search which is handled locally)
@@ -697,7 +703,7 @@ const CustomerSupport = () => {
     const matchesSearch = filters.search === '' || 
       ticket.subject.toLowerCase().includes(filters.search.toLowerCase()) ||
       ticket.ticketId.toLowerCase().includes(filters.search.toLowerCase()) ||
-      `${ticket.user.firstName} ${ticket.user.lastName}`.toLowerCase().includes(filters.search.toLowerCase());
+      (ticket.user && `${ticket.user.firstName || ''} ${ticket.user.lastName || ''}`.toLowerCase().includes(filters.search.toLowerCase()));
     
     return matchesStatus && matchesPriority && matchesCategory && matchesSearch;
   });
@@ -917,8 +923,12 @@ const CustomerSupport = () => {
                           <td className="px-4 py-4 font-mono text-sm font-medium text-yellow-300">{ticket.ticketId}</td>
                           <td className="px-4 py-4">
                             <div>
-                              <div className="font-medium text-white group-hover:text-yellow-300 transition-colors">{ticket.user.firstName} {ticket.user.lastName}</div>
-                              <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{ticket.user.email}</div>
+                              <div className="font-medium text-white group-hover:text-yellow-300 transition-colors">
+                                {ticket.user ? `${ticket.user.firstName || 'N/A'} ${ticket.user.lastName || ''}` : 'N/A'}
+                              </div>
+                              <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                                {ticket.user ? ticket.user.email || 'N/A' : 'N/A'}
+                              </div>
                             </div>
                           </td>
                           <td className="px-4 py-4">
@@ -1081,9 +1091,9 @@ const CustomerSupport = () => {
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold border-b border-yellow-400/30 pb-2">Customer Information</h3>
                     <div className="space-y-2">
-                      <p><span className="font-medium">Name:</span> {selectedTicket.user.firstName} {selectedTicket.user.lastName}</p>
-                      <p><span className="font-medium">Email:</span> {selectedTicket.user.email}</p>
-                      <p><span className="font-medium">Phone:</span> {selectedTicket.user.phoneNumber}</p>
+                      <p><span className="font-medium">Name:</span> {selectedTicket.user ? `${selectedTicket.user.firstName || 'N/A'} ${selectedTicket.user.lastName || ''}` : 'N/A'}</p>
+                      <p><span className="font-medium">Email:</span> {selectedTicket.user ? selectedTicket.user.email || 'N/A' : 'N/A'}</p>
+                      <p><span className="font-medium">Phone:</span> {selectedTicket.user ? selectedTicket.user.phoneNumber || 'N/A' : 'N/A'}</p>
                     </div>
                   </div>
 

@@ -71,6 +71,7 @@ import CustomerReferralTree from './Component/CustomerManagement/CustomerReferra
 import Login from './Component/login/Login';
 import AdminManagement from './Component/Add admin/AdminManagement';
 import CustomerSupport from './Component/CustomerSupport/CustomerSupport';
+import OfficialsAndFeed from './Component/OfficialsAndFeed/OfficialsAndFeed';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -186,6 +187,7 @@ const AppRoutes = () => {
         <Route path="/promocodedetail/:id" element={<ProtectedRoute><PromoCodeDetails /></ProtectedRoute>} />
         <Route path="/accountedit" element={<ProtectedRoute><ManualAccountEdits /></ProtectedRoute>} />
         <Route path="/reviewandrating" element={<ProtectedRoute><ReviewAndRating /></ProtectedRoute>} />
+        <Route path="/officialsandfeed" element={<ProtectedRoute><OfficialsAndFeed /></ProtectedRoute>} />
         <Route path="/reportanalytics" element={<ProtectedRoute><ReportAnalytics /></ProtectedRoute>} />
         <Route path="/driverreport" element={<ProtectedRoute><DriverReport /></ProtectedRoute>} />
         <Route path="/rideservicereport" element={<ProtectedRoute><RideServiceReport /></ProtectedRoute>} />

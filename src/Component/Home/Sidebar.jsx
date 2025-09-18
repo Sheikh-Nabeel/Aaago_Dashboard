@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LuLayoutDashboard } from 'react-icons/lu';
-import { FaSitemap, FaTruck, FaHandHolding, FaBriefcase, FaUserTie, FaUsers } from 'react-icons/fa';
+import { FaSitemap, FaTruck, FaHandHolding, FaBriefcase, FaUserTie, FaUsers, FaTags } from 'react-icons/fa';
 import { MdVerifiedUser, MdRequestPage, MdOutlineIndeterminateCheckBox } from 'react-icons/md';
 import { Link, useLocation } from 'react-router-dom';
 import { TbMessageDots } from 'react-icons/tb';
@@ -66,6 +66,7 @@ const Sidebar = () => {
     { path: '/kycverification', name: 'Admin Approvals', icon: <FiUserCheck size={20} />, permission: 'kycverification' },
     { path: '/reportanalytics', name: 'Reports', icon: <PiUserFocus size={25} />, permission: 'reportanalytics' },
     { path: '/reviewandrating', name: 'Rating & Reviews', icon: <CiBookmarkPlus size={25} />, permission: 'reviewandrating' },
+    { path: '/officialsandfeed', name: 'Officials & Feed', icon: <FaTags size={20} />, permission: 'officialsandfeed' },
     { path: '/adminmanagement', name: 'Admin Management', icon: <FaUserShield size={20} />, permission: 'adminmanagement' },
   ];
 

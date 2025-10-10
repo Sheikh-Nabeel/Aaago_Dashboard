@@ -2,8 +2,9 @@ import React from "react";
 import ReactApexChart from "react-apexcharts";
 import { IoIosFunnel } from "react-icons/io"; // Filter icon
 
-const LineChart = () => {
-  const series = [
+const LineChart = ({ chartData, period, onPeriodChange }) => {
+  // Default data if no chartData provided
+  const defaultSeries = [
     {
       name: "Total Signups",
       data: [60, 50, 90, 40, 60, 30, 20],
@@ -18,6 +19,28 @@ const LineChart = () => {
     },
   ];
 
+  const defaultLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  // Process API data
+  const series = chartData?.datasets ? chartData.datasets.map(dataset => ({
+    name: dataset.label,
+    data: dataset.data,
+  })) : defaultSeries;
+
+  const labels = chartData?.labels || defaultLabels;
+
+  // Color mapping for datasets
+  const getColorForDataset = (datasetName) => {
+    const colorMap = {
+      "Total Signups": "#DDC104",
+      "KYC Verifications": "#00FF66", 
+      "Active Conversions": "#3B3BFF"
+    };
+    return colorMap[datasetName] || "#DDC104";
+  };
+
+  const colors = series.map(s => getColorForDataset(s.name));
+
   const options = {
     chart: {
       type: "line",
@@ -29,9 +52,9 @@ const LineChart = () => {
       curve: "straight", // solid line
       width: 3,
     },
-    colors: ["#DDC104", "#00FF66", "#3B3BFF"],
+    colors: colors,
     xaxis: {
-      categories: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      categories: labels,
       axisBorder: {
         show: true,
         color: "#DDC104",
@@ -87,12 +110,21 @@ const LineChart = () => {
       className="w-full max-w-5xl border-2 border-yellow-400 p-4 rounded"
       style={{ backgroundColor: "#013220" }}
     >
-      {/* Header Row with Chart Type, Day, Filter */}
+      {/* Header Row with Chart Type, Period Filter */}
       <div className="flex justify-between items-center border-b border-[#DDC104] pb-2 mb-4">
-        <h2 className="text-xl font-bold text-[#DDC104]">Chart Type:</h2>
-        <div className="flex gap-2">
-        <p className="text-sm text-[#DDC104]">Day</p>
-        <IoIosFunnel className="text-xl text-[#DDC104] cursor-pointer" />
+        <h2 className="text-xl font-bold text-[#DDC104]">Analytics Chart</h2>
+        <div className="flex gap-2 items-center">
+          <select
+            value={period || 'year'}
+            onChange={(e) => onPeriodChange && onPeriodChange(e.target.value)}
+            className="bg-transparent border border-[#DDC104] text-[#DDC104] px-2 py-1 rounded text-sm focus:outline-none"
+          >
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+          <IoIosFunnel className="text-xl text-[#DDC104] cursor-pointer" />
         </div>
       </div>
 

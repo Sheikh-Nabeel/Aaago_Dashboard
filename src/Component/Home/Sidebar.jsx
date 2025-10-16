@@ -10,6 +10,7 @@ import { RiWallet3Fill } from 'react-icons/ri';
 import { CiBookmarkPlus } from 'react-icons/ci';
 import { LiaUserFriendsSolid } from 'react-icons/lia';
 import { FaUserShield } from 'react-icons/fa6';
+import { RiPriceTag3Fill } from 'react-icons/ri';
 import axios from 'axios';
 
 const Sidebar = () => {
@@ -67,11 +68,12 @@ const Sidebar = () => {
     { path: '/reportanalytics', name: 'Reports', icon: <PiUserFocus size={25} />, permission: 'reportanalytics' },
     { path: '/reviewandrating', name: 'Rating & Reviews', icon: <CiBookmarkPlus size={25} />, permission: 'reviewandrating' },
     { path: '/officialsandfeed', name: 'Officials & Feed', icon: <FaTags size={20} />, permission: 'officialsandfeed' },
+    { path: '/bookingcharges', name: 'Booking Charges', icon: <RiPriceTag3Fill size={20} />, permission: 'bookingcharges' },
     { path: '/adminmanagement', name: 'Admin Management', icon: <FaUserShield size={20} />, permission: 'adminmanagement' },
   ];
 
   const visibleRoutes = userRole === 'superadmin' ? routes : routes.filter(route =>
-    route.permission === 'adminmanagement' ? userRole === 'superadmin' : permissions.includes(route.permission)
+    (route.permission === 'adminmanagement' || route.permission === 'bookingcharges') ? userRole === 'superadmin' : permissions.includes(route.permission)
   );
 
   return (

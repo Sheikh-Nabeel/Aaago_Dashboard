@@ -72,6 +72,7 @@ import Login from './Component/login/Login';
 import AdminManagement from './Component/Add admin/AdminManagement';
 import CustomerSupport from './Component/CustomerSupport/CustomerSupport';
 import OfficialsAndFeed from './Component/OfficialsAndFeed/OfficialsAndFeed';
+import BookingCharges from './Component/BookingCharges/BookingCharges';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -188,6 +189,12 @@ const AppRoutes = () => {
         <Route path="/accountedit" element={<ProtectedRoute><ManualAccountEdits /></ProtectedRoute>} />
         <Route path="/reviewandrating" element={<ProtectedRoute><ReviewAndRating /></ProtectedRoute>} />
         <Route path="/officialsandfeed" element={<ProtectedRoute><OfficialsAndFeed /></ProtectedRoute>} />
+        <Route path="/bookingcharges" element={<ProtectedRoute><BookingCharges /></ProtectedRoute>} />
+        <Route path="/bookingcharges/carcab" element={<ProtectedRoute><BookingCharges /></ProtectedRoute>} />
+        <Route path="/bookingcharges/bike" element={<ProtectedRoute><BookingCharges /></ProtectedRoute>} />
+        <Route path="/bookingcharges/carrecovery" element={<ProtectedRoute><BookingCharges /></ProtectedRoute>} />
+        <Route path="/bookingcharges/shiftingmovers" element={<ProtectedRoute><BookingCharges /></ProtectedRoute>} />
+        <Route path="/bookingcharges/appointmentservices" element={<ProtectedRoute><BookingCharges /></ProtectedRoute>} />
         <Route path="/reportanalytics" element={<ProtectedRoute><ReportAnalytics /></ProtectedRoute>} />
         <Route path="/driverreport" element={<ProtectedRoute><DriverReport /></ProtectedRoute>} />
         <Route path="/rideservicereport" element={<ProtectedRoute><RideServiceReport /></ProtectedRoute>} />

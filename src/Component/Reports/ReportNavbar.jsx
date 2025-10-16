@@ -57,11 +57,12 @@ const ReportNavbar = () => {
 
         <div className="w-[2px] h-3 bg-yellow-400" />
 
-        <Link to="/supportreport" className={linkClass('/supportreport')}>
+        {/* Support Reports - Commented out for now, can be restored later */}
+        {/* <Link to="/supportreport" className={linkClass('/supportreport')}>
          Support Reports
         </Link>
 
-        <div className="w-[2px] h-3 bg-yellow-400" />
+        <div className="w-[2px] h-3 bg-yellow-400" /> */}
 
         <Link to="/approvalactivities" className={linkClass('/approvalactivities')}>
           Approved Activities 

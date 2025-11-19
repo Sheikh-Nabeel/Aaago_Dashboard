@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast"; // Import toast
+import toast from "react-hot-toast";
 import CrrLineChart from "./CrrLineChart";
-import CrrTeamStructureChart from "./CrrTeamStructureChart";
+import axiosInstance from "../../services/axiosConfig";
+import { getCrrLegPercentages, updateGlobalLegPercentages } from "../../features/Mlm/mlmService";
 
 
 const MlmCrr = () => {
@@ -11,44 +12,49 @@ const MlmCrr = () => {
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [legData, setLegData] = useState(null);
+  const [legForm, setLegForm] = useState(null);
+  const [isLegEditing, setIsLegEditing] = useState(false);
 
-  // Fetch leaderboard data
   useEffect(() => {
-    const fetchLeaderboard = async () => {
+    let cancelled = false;
+    const fetchAll = async () => {
+      setLoading(true);
       try {
-        const response = await fetch("http://localhost:3001/api/mlm/crr/leaderboard");
-        const result = await response.json();
-        if (result.success) {
-          setLeaderboardData(result.data.leaderboard);
-        } else {
-          setError("Failed to load leaderboard data");
+        const [leaderboardRes, configRes, legsRes] = await Promise.all([
+          axiosInstance.get("/mlm/crr/leaderboard"),
+          axiosInstance.get("/mlm/admin/crr/config"),
+          getCrrLegPercentages(),
+        ]);
+
+        if (!cancelled) {
+          const lb = leaderboardRes.data;
+          if (lb?.success) setLeaderboardData(lb.data.leaderboard);
+
+          const cfg = configRes.data;
+          if (cfg?.success) {
+            setCrrConfigData(cfg.data);
+            setFormData(cfg.data);
+          }
+
+          if (legsRes) {
+            setLegData(legsRes);
+            setLegForm({
+              legSplitRatio: { ...legsRes.legSplitRatio },
+              legPercentages: { ...legsRes.legPercentages },
+            });
+          }
         }
       } catch (err) {
-        setError("Error fetching leaderboard data");
+        const msg = err?.message || 'Error fetching CRR data';
+        setError(msg);
+        toast.error(msg);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-    fetchLeaderboard();
-  }, []);
-
-  // Fetch CRR configuration
-  useEffect(() => {
-    const fetchCrrConfig = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/api/mlm/admin/crr/config");
-        const result = await response.json();
-        if (result.success) {
-          setCrrConfigData(result.data);
-          setFormData(result.data); // Initialize form data with fetched config
-        } else {
-          setError("Failed to load CRR configuration");
-        }
-      } catch (err) {
-        setError("Error fetching CRR configuration");
-      }
-    };
-    fetchCrrConfig();
+    fetchAll();
+    return () => { cancelled = true; };
   }, []);
 
   // Handle form input changes
@@ -70,23 +76,44 @@ const MlmCrr = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:3001/api/mlm/admin/crr/config", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      const result = await response.json();
+      const response = await axiosInstance.put("/mlm/admin/crr/config", formData);
+      const result = response.data;
       if (result.success) {
         setCrrConfigData(result.data);
         setIsEditing(false);
-        toast.success("CRR configuration updated successfully!"); // Use toast instead of alert
+        toast.success("CRR configuration updated successfully!");
       } else {
         setError("Failed to update CRR configuration");
       }
-    } catch (err) {
+    } catch {
       setError("Error updating CRR configuration");
+    }
+  };
+
+  const handleLegInputChange = (e, section, key) => {
+    const value = Number(e.target.value);
+    setLegForm((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [key]: value,
+      },
+    }));
+  };
+
+  const handleLegSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        legSplitRatio: legForm.legSplitRatio,
+        legPercentages: legForm.legPercentages,
+      };
+      const data = await updateGlobalLegPercentages(payload);
+      setLegData({ ...data, lastUpdated: data.lastUpdated });
+      setIsLegEditing(false);
+      toast.success("Leg percentages updated successfully!");
+    } catch {
+      setError("Failed to update leg percentages");
     }
   };
 
@@ -266,6 +293,73 @@ const MlmCrr = () => {
             >
               Edit Configuration
             </button>
+            <div className="border border-yellow-400 p-4 rounded-lg mt-4">
+              <h4 className="text-sm font-semibold mb-2">Leg Split & Percentages</h4>
+              {!isLegEditing ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-6 items-start">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="rounded-full flex items-center justify-center" style={{ width: '140px', height: '140px', background: `conic-gradient(#DDC104 ${((legData?.legSplitRatio?.fromThreeLegs ?? 0) * 3.6)}deg, #013723 0deg)` }}>
+                        <div className="rounded-full flex items-center justify-center text-2xl font-semibold" style={{ width: '108px', height: '108px', background: '#013220' }}>{Math.round(legData?.legSplitRatio?.fromThreeLegs ?? 0)}%</div>
+                      </div>
+                      <div className="text-xs">From Three Legs</div>
+                      <div className="mt-3 grid grid-cols-3 gap-3">
+                        {['legA','legB','legC'].map((k) => (
+                          <div key={k} className="flex flex-col items-center gap-1">
+                            <div className="rounded-full flex items-center justify-center" style={{ width: '90px', height: '90px', background: `conic-gradient(#DDC104 ${((legData?.legPercentages?.[k] ?? 0) * 3.6)}deg, #013723 0deg)` }}>
+                              <div className="rounded-full flex items-center justify-center text-lg font-semibold" style={{ width: '68px', height: '68px', background: '#013220' }}>{Math.round(legData?.legPercentages?.[k] ?? 0)}%</div>
+                            </div>
+                            <div className="text-xs uppercase">{k.replace('leg','Leg ')}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="rounded-full flex items-center justify-center" style={{ width: '140px', height: '140px', background: `conic-gradient(#DDC104 ${((legData?.legSplitRatio?.fromOtherLegs ?? 0) * 3.6)}deg, #013723 0deg)` }}>
+                        <div className="rounded-full flex items-center justify-center text-2xl font-semibold" style={{ width: '108px', height: '108px', background: '#013220' }}>{Math.round(legData?.legSplitRatio?.fromOtherLegs ?? 0)}%</div>
+                      </div>
+                      <div className="text-xs">From Other Legs</div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-300">Last Updated: {legData?.lastUpdated ? new Date(legData.lastUpdated).toLocaleString() : 'N/A'}</p>
+                  <button onClick={() => setIsLegEditing(true)} className="bg-yellow-400 text-black px-3 py-1 rounded hover:bg-yellow-500">Edit</button>
+                </div>
+              ) : (
+                <form onSubmit={handleLegSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-6 items-start">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="rounded-full flex items-center justify-center" style={{ width: '140px', height: '140px', background: `conic-gradient(#DDC104 ${((legForm?.legSplitRatio?.fromThreeLegs ?? 0) * 3.6)}deg, #013723 0deg)` }}>
+                        <div className="rounded-full flex items-center justify-center text-2xl font-semibold" style={{ width: '108px', height: '108px', background: '#013220' }}>{Math.round(legForm?.legSplitRatio?.fromThreeLegs ?? 0)}%</div>
+                      </div>
+                      <div className="text-xs">From Three Legs</div>
+                      <input type="number" value={legForm?.legSplitRatio?.fromThreeLegs ?? 0} onChange={(e) => handleLegInputChange(e, 'legSplitRatio', 'fromThreeLegs')} className="bg-transparent border border-yellow-400 rounded px-2 py-1 text-sm w-24 text-center" />
+                      <div className="mt-3 grid grid-cols-3 gap-3">
+                        {['legA','legB','legC'].map((k) => (
+                          <div key={k} className="flex flex-col items-center gap-1">
+                            <div className="rounded-full flex items-center justify-center" style={{ width: '90px', height: '90px', background: `conic-gradient(#DDC104 ${((legForm?.legPercentages?.[k] ?? 0) * 3.6)}deg, #013723 0deg)` }}>
+                              <div className="rounded-full flex items-center justify-center text-lg font-semibold" style={{ width: '68px', height: '68px', background: '#013220' }}>{Math.round(legForm?.legPercentages?.[k] ?? 0)}%</div>
+                            </div>
+                            <div className="text-xs uppercase">{k.replace('leg','Leg ')}</div>
+                            <input type="number" value={legForm?.legPercentages?.[k] ?? 0} onChange={(e) => handleLegInputChange(e, 'legPercentages', k)} className="bg-transparent border border-yellow-400 rounded px-2 py-1 text-sm w-20 text-center" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="rounded-full flex items-center justify-center" style={{ width: '140px', height: '140px', background: `conic-gradient(#DDC104 ${((legForm?.legSplitRatio?.fromOtherLegs ?? 0) * 3.6)}deg, #013723 0deg)` }}>
+                        <div className="rounded-full flex items-center justify-center text-2xl font-semibold" style={{ width: '108px', height: '108px', background: '#013220' }}>{Math.round(legForm?.legSplitRatio?.fromOtherLegs ?? 0)}%</div>
+                      </div>
+                      <div className="text-xs">From Other Legs</div>
+                      <input type="number" value={legForm?.legSplitRatio?.fromOtherLegs ?? 0} onChange={(e) => handleLegInputChange(e, 'legSplitRatio', 'fromOtherLegs')} className="bg-transparent border border-yellow-400 rounded px-2 py-1 text-sm w-24 text-center" />
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button type="submit" className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500">Save</button>
+                    <button type="button" onClick={() => setIsLegEditing(false)} className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+                  </div>
+                </form>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-4">
               {crrConfigData?.crrRanks &&
                 Object.keys(crrConfigData.crrRanks).map((rank) => (
@@ -380,11 +474,7 @@ const MlmCrr = () => {
         </div>
       )}
 
-      {/* Team Structure Chart */}
-      <div className="p-4 rounded-lg shadow-lg">
-        <h3 className="text-base font-semibold mb-4">Team Structure</h3>
-        <CrrTeamStructureChart />
-      </div>
+      
     </div>
   );
 };

@@ -7,5 +7,13 @@ export default defineConfig({
   base: './', // keeps your relative asset paths
   build: {
     chunkSizeWarningLimit: 2000 // size in kB, so this is 2 MB
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true
+      }
+    }
   }
 })

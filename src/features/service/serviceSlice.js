@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axiosInstance from '../../services/axiosConfig';
 
 export const fetchServices = createAsyncThunk(
   'services/fetchServices',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('http://localhost:3001/api/user/services', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
+      const response = await axiosInstance.get('/user/services');
       return response.data.services;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -19,10 +17,9 @@ export const approveService = createAsyncThunk(
   'services/approveService',
   async (serviceId, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `http://localhost:3001/api/user/services/approve/${serviceId}`,
-        {},
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      const response = await axiosInstance.post(
+        `/user/services/approve/${serviceId}`,
+        {}
       );
       return response.data;
     } catch (error) {
@@ -35,10 +32,9 @@ export const rejectService = createAsyncThunk(
   'services/rejectService',
   async ({ serviceId, reason }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `http://localhost:3001/api/user/services/reject/${serviceId}`,
-        { reason },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      const response = await axiosInstance.post(
+        `/user/services/reject/${serviceId}`,
+        { reason }
       );
       return response.data;
     } catch (error) {

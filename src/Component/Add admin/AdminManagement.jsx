@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../services/axiosConfig";
 import toast from "react-hot-toast";
 import ConfirmationModal from '../Common/ConfirmationModal';
 
@@ -39,11 +39,8 @@ const AdminManagement = () => {
 
   const fetchAdmins = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3001/api/user/admins",
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+      const response = await axiosInstance.get(
+        "/user/admins"
       );
       setAdmins(response.data.admins || []);
     } catch (error) {
@@ -102,12 +99,9 @@ const AdminManagement = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:3001/api/user/admin/add-admin",
-        newAdmin,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+      const response = await axiosInstance.post(
+        "/user/admin/add-admin",
+        newAdmin
       );
       toast.success(response.data.message || "Admin added successfully");
       setNewAdmin({
@@ -137,12 +131,9 @@ const AdminManagement = () => {
     }
 
     try {
-      await axios.put(
-        `http://localhost:3001/api/user/admin/edit-admin/${editingAdmin._id}`,
-        editingAdmin,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+      await axiosInstance.put(
+        `/user/admin/edit-admin/${editingAdmin._id}`,
+        editingAdmin
       );
       toast.success("Admin updated successfully");
       setEditingAdmin(null);
@@ -163,13 +154,8 @@ const AdminManagement = () => {
   const confirmDeleteAdmin = async () => {
     if (adminToDelete) {
       try {
-        await axios.delete(
-          `http://localhost:3001/api/user/admin/delete-admin/${adminToDelete}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+        await axiosInstance.delete(
+          `/user/admin/delete-admin/${adminToDelete}`
         );
         toast.success("Admin deleted successfully");
         fetchAdmins();

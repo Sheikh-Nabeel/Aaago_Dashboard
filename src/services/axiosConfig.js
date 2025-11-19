@@ -1,17 +1,20 @@
 import axios from 'axios';
 import { store } from '../app/store';
-import { logout, setCredentials } from '../features/slice/authSlice';
-import { isTokenValid, getTokenExpirationTime } from '../utils/tokenUtils';
+import { logout } from '../features/slice/authSlice';
+import { isTokenValid } from '../utils/tokenUtils';
 
-// Create axios instance
+const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || '/api';
+const API_TIMEOUT_MS = Number(import.meta.env?.VITE_API_TIMEOUT_MS) || 30000;
+const ENABLE_TOKEN_REFRESH = (import.meta.env?.VITE_ENABLE_TOKEN_REFRESH === 'true');
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3001/api',
-  timeout: 10000,
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT_MS,
 });
 
 // Request interceptor to add token to headers
 axiosInstance.interceptors.request.use(
   (config) => {
+    config.metadata = { start: performance.now() };
     const state = store.getState();
     const token = state.auth.token;
     
@@ -47,9 +50,21 @@ axiosInstance.interceptors.request.use(
 
 // Response interceptor to handle token expiration and errors
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const label = `${response.config.method?.toUpperCase()} ${response.config.url}`;
+    if (response.config.metadata?.start) {
+      const dur = Math.round(performance.now() - response.config.metadata.start);
+      console.log(label, dur);
+    }
+    return response;
+  },
   async (error) => {
     const { response, config } = error;
+    const label = `${config?.method?.toUpperCase()} ${config?.url}`;
+    if (config?.metadata?.start) {
+      const dur = Math.round(performance.now() - config.metadata.start);
+      console.log(label, dur);
+    }
     
     if (response?.status === 401 || response?.status === 403) {
       console.log('Unauthorized access detected:', response.status);
@@ -65,29 +80,25 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error);
       }
       
-      // Try to refresh token before logging out
-      try {
-        const state = store.getState();
-        const { token } = state.auth;
-        
-        if (token && isTokenValid(token)) {
-          // Import tokenRefreshService dynamically to avoid circular dependency
-          const { default: tokenRefreshService } = await import('./tokenRefreshService');
-          const refreshSuccess = await tokenRefreshService.refreshToken();
-          
-          if (refreshSuccess) {
-            // Retry the original request with new token
-            const newState = store.getState();
-            const newToken = newState.auth.token;
-            
-            if (newToken) {
-              config.headers.Authorization = `Bearer ${newToken}`;
-              return axiosInstance(config);
+      if (ENABLE_TOKEN_REFRESH) {
+        try {
+          const state = store.getState();
+          const { token } = state.auth;
+          if (token && isTokenValid(token)) {
+            const { default: tokenRefreshService } = await import('./tokenRefreshService');
+            const refreshSuccess = await tokenRefreshService.refreshToken();
+            if (refreshSuccess) {
+              const newState = store.getState();
+              const newToken = newState.auth.token;
+              if (newToken) {
+                config.headers.Authorization = `Bearer ${newToken}`;
+                return axiosInstance(config);
+              }
             }
           }
+        } catch (refreshError) {
+          console.error('Token refresh attempt failed:', refreshError);
         }
-      } catch (refreshError) {
-        console.error('Token refresh attempt failed:', refreshError);
       }
       
       // If refresh fails or token is invalid, logout
@@ -120,5 +131,5 @@ axiosInstance.interceptors.response.use(
 
 // Re-export token utilities for backward compatibility
 export { isTokenValid, getTokenExpirationTime } from '../utils/tokenUtils';
-
+export { API_BASE_URL, API_TIMEOUT_MS };
 export default axiosInstance;

@@ -3,14 +3,13 @@ import toast from 'react-hot-toast';
 import Sidebar from '../Home/Sidebar';
 import AdminApprovalNav from './AdminApprovalNav';
 import ConfirmationModal from '../Common/ConfirmationModal';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useGetPendingKYCsQuery, apiSlice } from '../../features/service/apiSlice';
 
-const IMAGE_BASE_URL = 'http://localhost:3001';
+const IMAGE_BASE_URL = import.meta.env?.VITE_IMAGE_BASE_URL || 'http://localhost:3001';
 
 const KYCVerificationTable = () => {
   const dispatch = useDispatch();
-  const token = useSelector((state) => state.auth.token);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [sortBy, setSortBy] = useState('Pending');
   const [roleFilter, setRoleFilter] = useState('All');

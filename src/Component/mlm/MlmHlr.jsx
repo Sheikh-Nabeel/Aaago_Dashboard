@@ -14,6 +14,9 @@ const MlmHlr = () => {
     rewardAmount: ''
   });
   const [hlrLoading, setHlrLoading] = useState(false);
+  const [hlrLegData, setHlrLegData] = useState(null);
+  const [hlrLegForm, setHlrLegForm] = useState(null);
+  const [isHlrLegEditing, setIsHlrLegEditing] = useState(false);
 
   const hlrCriteria = {
     accumulatedPGP: 'Min 25%',
@@ -39,6 +42,73 @@ const MlmHlr = () => {
       }
     } catch (err) {
       console.error('Failed to fetch HLR config:', err);
+    }
+  };
+  
+  // Fetch HLR leg split & percentages
+  const fetchHlrLegConfig = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/mlm/admin/hlr/leg-configuration');
+      if (response.ok) {
+        const json = await response.json();
+        if (json.success && json.data) {
+          setHlrLegData(json.data);
+          setHlrLegForm({
+            legSplitRatio: { ...(json.data.legSplitRatio || {}) },
+            legPercentages: { ...(json.data.legPercentages || {}) },
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch HLR leg configuration:', err);
+    }
+  };
+  
+  const handleHlrLegInputChange = (e, section, key) => {
+    const value = Number(e.target.value);
+    setHlrLegForm((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [key]: value,
+      },
+    }));
+  };
+  
+  const handleHlrLegSubmit = async (e) => {
+    e.preventDefault();
+    const splitSum = (hlrLegForm?.legSplitRatio?.fromThreeLegs || 0) + (hlrLegForm?.legSplitRatio?.fromOtherLegs || 0);
+    const legsSum = (hlrLegForm?.legPercentages?.legA || 0) + (hlrLegForm?.legPercentages?.legB || 0) + (hlrLegForm?.legPercentages?.legC || 0);
+    if (splitSum !== 100) {
+      toast.error('Split ratio must total 100%');
+      return;
+    }
+    if (legsSum !== 100) {
+      toast.error('Leg A + B + C must total 100%');
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:3001/api/mlm/admin/hlr/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          legSplitRatio: hlrLegForm.legSplitRatio,
+          legPercentages: hlrLegForm.legPercentages,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update HLR leg configuration: ${response.status} ${response.statusText}`);
+      }
+      const json = await response.json();
+      if (!json.success) {
+        throw new Error(json.message || 'Failed to update HLR leg configuration');
+      }
+      toast.success(json.message || 'HLR leg configuration updated successfully');
+      await fetchHlrLegConfig();
+      setIsHlrLegEditing(false);
+    } catch (err) {
+      console.error('Update HLR leg configuration error:', err);
+      toast.error(err.message);
     }
   };
   
@@ -125,6 +195,7 @@ const MlmHlr = () => {
 
     fetchLeaderboard();
     fetchHlrConfig();
+    fetchHlrLegConfig();
   }, []);
 
   if (loading) {
@@ -197,6 +268,75 @@ const MlmHlr = () => {
             {hlrLoading ? 'Updating...' : 'Update HLR Configuration'}
           </button>
         </form>
+      </div>
+
+      {/* Leg Split & Percentages */}
+      <div className="mb-6 p-4 border border-yellow-400 rounded-lg">
+        <h3 className="text-md font-semibold mb-2 text-yellow-400">Leg Split & Percentages</h3>
+        {!isHlrLegEditing ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-6 items-start">
+              <div className="flex flex-col items-center gap-2">
+                <div className="rounded-full flex items-center justify-center" style={{ width: '140px', height: '140px', background: `conic-gradient(#DDC104 ${(((hlrLegData?.legSplitRatio?.fromThreeLegs ?? 0) * 3.6))}deg, #013723 0deg)` }}>
+                  <div className="rounded-full flex items-center justify-center text-2xl font-semibold" style={{ width: '108px', height: '108px', background: '#013220' }}>{Math.round(hlrLegData?.legSplitRatio?.fromThreeLegs ?? 0)}%</div>
+                </div>
+                <div className="text-xs">From Three Legs</div>
+                <div className="mt-3 grid grid-cols-3 gap-3">
+                  {['legA','legB','legC'].map((k) => (
+                    <div key={k} className="flex flex-col items-center gap-1">
+                      <div className="rounded-full flex items-center justify-center" style={{ width: '90px', height: '90px', background: `conic-gradient(#DDC104 ${(((hlrLegData?.legPercentages?.[k] ?? 0) * 3.6))}deg, #013723 0deg)` }}>
+                        <div className="rounded-full flex items-center justify-center text-lg font-semibold" style={{ width: '68px', height: '68px', background: '#013220' }}>{Math.round(hlrLegData?.legPercentages?.[k] ?? 0)}%</div>
+                      </div>
+                      <div className="text-xs uppercase">{k.replace('leg','Leg ')}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="rounded-full flex items-center justify-center" style={{ width: '140px', height: '140px', background: `conic-gradient(#DDC104 ${(((hlrLegData?.legSplitRatio?.fromOtherLegs ?? 0) * 3.6))}deg, #013723 0deg)` }}>
+                  <div className="rounded-full flex items-center justify-center text-2xl font-semibold" style={{ width: '108px', height: '108px', background: '#013220' }}>{Math.round(hlrLegData?.legSplitRatio?.fromOtherLegs ?? 0)}%</div>
+                </div>
+                <div className="text-xs">From Other Legs</div>
+              </div>
+            </div>
+            <p className="text-xs text-gray-300">Last Updated: {hlrLegData?.lastUpdated ? new Date(hlrLegData.lastUpdated).toLocaleString() : 'N/A'}</p>
+            <button onClick={() => setIsHlrLegEditing(true)} className="bg-yellow-400 text-black px-3 py-1 rounded hover:bg-yellow-500">Edit</button>
+          </div>
+        ) : (
+          <form onSubmit={handleHlrLegSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-6 items-start">
+              <div className="flex flex-col items-center gap-2">
+                <div className="rounded-full flex items-center justify-center" style={{ width: '140px', height: '140px', background: `conic-gradient(#DDC104 ${(((hlrLegForm?.legSplitRatio?.fromThreeLegs ?? 0) * 3.6))}deg, #013723 0deg)` }}>
+                  <div className="rounded-full flex items-center justify-center text-2xl font-semibold" style={{ width: '108px', height: '108px', background: '#013220' }}>{Math.round(hlrLegForm?.legSplitRatio?.fromThreeLegs ?? 0)}%</div>
+                </div>
+                <div className="text-xs">From Three Legs</div>
+                <input type="number" value={hlrLegForm?.legSplitRatio?.fromThreeLegs ?? 0} onChange={(e) => handleHlrLegInputChange(e, 'legSplitRatio', 'fromThreeLegs')} className="bg-transparent border border-yellow-400 rounded px-2 py-1 text-sm w-24 text-center" />
+                <div className="mt-3 grid grid-cols-3 gap-3">
+                  {['legA','legB','legC'].map((k) => (
+                    <div key={k} className="flex flex-col items-center gap-1">
+                      <div className="rounded-full flex items-center justify-center" style={{ width: '90px', height: '90px', background: `conic-gradient(#DDC104 ${(((hlrLegForm?.legPercentages?.[k] ?? 0) * 3.6))}deg, #013723 0deg)` }}>
+                        <div className="rounded-full flex items-center justify-center text-lg font-semibold" style={{ width: '68px', height: '68px', background: '#013220' }}>{Math.round(hlrLegForm?.legPercentages?.[k] ?? 0)}%</div>
+                      </div>
+                      <div className="text-xs uppercase">{k.replace('leg','Leg ')}</div>
+                      <input type="number" value={hlrLegForm?.legPercentages?.[k] ?? 0} onChange={(e) => handleHlrLegInputChange(e, 'legPercentages', k)} className="bg-transparent border border-yellow-400 rounded px-2 py-1 text-sm w-20 text-center" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="rounded-full flex items-center justify-center" style={{ width: '140px', height: '140px', background: `conic-gradient(#DDC104 ${(((hlrLegForm?.legSplitRatio?.fromOtherLegs ?? 0) * 3.6))}deg, #013723 0deg)` }}>
+                  <div className="rounded-full flex items-center justify-center text-2xl font-semibold" style={{ width: '108px', height: '108px', background: '#013220' }}>{Math.round(hlrLegForm?.legSplitRatio?.fromOtherLegs ?? 0)}%</div>
+                </div>
+                <div className="text-xs">From Other Legs</div>
+                <input type="number" value={hlrLegForm?.legSplitRatio?.fromOtherLegs ?? 0} onChange={(e) => handleHlrLegInputChange(e, 'legSplitRatio', 'fromOtherLegs')} className="bg-transparent border border-yellow-400 rounded px-2 py-1 text-sm w-24 text-center" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button type="submit" className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500">Save</button>
+              <button type="button" onClick={() => setIsHlrLegEditing(false)} className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Criteria Table */}

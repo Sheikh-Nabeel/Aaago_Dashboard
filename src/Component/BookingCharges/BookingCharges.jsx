@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../Home/Sidebar';
 import { useGetVehicleSelectFlowQuery, useLazyGetComprehensivePricingQuery, useUpdateComprehensivePricingMutation } from '../../features/service/apiSlice';
+import toast from 'react-hot-toast';
 
 const BookingCharges = () => {
   const { data: flowData, isLoading, isError, error } = useGetVehicleSelectFlowQuery();
@@ -54,12 +55,18 @@ const BookingCharges = () => {
     if (params.category && (params.service || !hasCategories)) {
       fetchConfig(params).unwrap()
         .then((data) => { setConfigData(data); setForm(data); })
-        .catch(() => setConfigData(null));
+        .catch(() => { setConfigData(null); toast.error('Failed to load configuration'); });
     } else {
       setConfigData(null);
       setForm(null);
     }
   }, [serviceKey, categoryKey, subKey, flow]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(error?.message || 'Failed to load vehicle select flow');
+    }
+  }, [isError, error]);
 
   const renderContent = () => {
     if (isLoading) {
@@ -144,34 +151,39 @@ const BookingCharges = () => {
     });
   };
   const onSave = async () => {
-    const category = serviceKey || '';
-    const hasCategories = Boolean(Array.isArray(flow) && flow.find(f => f.key === serviceKey)?.categories);
-    const service = hasCategories ? (categoryKey || '') : (categoryKey || '');
-    const subService = hasCategories ? (subKey || '') : '';
-    const params = {
-      category: normalizeKey(category),
-      service: normalizeKey(service),
-      subService: normalizeKey(subService),
-    };
-    let body = form || {};
-    if (normalizeKey(category) === 'bike') {
-      const svc = normalizeKey(service);
-      const vt = {
-        baseFare: body.baseFare ?? 0,
-        perKmRate: body.perKmRate ?? 0,
-        nightCharges: body.nightCharges || { enabled: false, startHour: 0, endHour: 0, fixedAmount: 0, multiplier: 1 },
-        label: body.label || '',
-        info: body.info || ''
+    try {
+      const category = serviceKey || '';
+      const hasCategories = Boolean(Array.isArray(flow) && flow.find(f => f.key === serviceKey)?.categories);
+      const service = hasCategories ? (categoryKey || '') : (categoryKey || '');
+      const subService = hasCategories ? (subKey || '') : '';
+      const params = {
+        category: normalizeKey(category),
+        service: normalizeKey(service),
+        subService: normalizeKey(subService),
       };
-      body = {
-        vehicleTypes: { [svc]: vt },
-        minimumFare: body.minimumFare ?? 0
-      };
+      let body = form || {};
+      if (normalizeKey(category) === 'bike') {
+        const svc = normalizeKey(service);
+        const vt = {
+          baseFare: body.baseFare ?? 0,
+          perKmRate: body.perKmRate ?? 0,
+          nightCharges: body.nightCharges || { enabled: false, startHour: 0, endHour: 0, fixedAmount: 0, multiplier: 1 },
+          label: body.label || '',
+          info: body.info || ''
+        };
+        body = {
+          vehicleTypes: { [svc]: vt },
+          minimumFare: body.minimumFare ?? 0
+        };
+      }
+      await updateConfig({ ...params, body }).unwrap();
+      const refreshed = await fetchConfig(params).unwrap();
+      setConfigData(refreshed);
+      setForm(refreshed);
+      toast.success('Configuration updated');
+    } catch (e) {
+      toast.error(e?.data?.message || e?.message || 'Failed to update configuration');
     }
-    await updateConfig({ ...params, body }).unwrap();
-    const refreshed = await fetchConfig(params).unwrap();
-    setConfigData(refreshed);
-    setForm(refreshed);
   };
 
   return (

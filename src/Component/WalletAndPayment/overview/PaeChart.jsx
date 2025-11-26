@@ -10,20 +10,23 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const PaeChart = () => {
+const PaeChart = ({ labels = [], values = [] }) => {
+  const safeLabels = Array.isArray(labels) && labels.length ? labels : ["CRR", "Ambassador", "Platinum"];
+  const safeValues = Array.isArray(values) && values.length ? values : [20, 40, 15];
+  const palette = [
+    "#DDC104", "#00C292", "#FF6B6B", "#4C6EF5", "#F59E0B", "#10B981",
+    "#EF4444", "#6366F1", "#22C55E", "#F97316", "#14B8A6", "#84CC16"
+  ];
+  const colors = safeLabels.map((_, i) => palette[i % palette.length]);
+
   const data = {
-    labels: ["CRR", "Ambassador", "Platinum" , ""],
+    labels: safeLabels,
     datasets: [
       {
-        data: [20, 40, 15,60], // Adjust slice proportions
-        backgroundColor: ["#FFD700", "#00FF00", "#FF0000", "#174332" ],
+        data: safeValues,
+        backgroundColor: colors,
         borderWidth: 0,
-        borderColor: [
-          "rgba(255, 215, 0, 1)", // Gold border
-          "rgba(255, 215, 0, 1)",
-          "rgba(255, 215, 0, 1)"
-        ],
-        hoverOffset: 10,
+        hoverOffset: 8,
       },
     ],
   };
@@ -36,9 +39,7 @@ const PaeChart = () => {
       datalabels: {
         color: "#000",
         font: { size: 10, weight: "bold" },
-        formatter: (value, context) => {
-          return context.chart.data.labels[context.dataIndex];
-        },
+        formatter: (value, context) => context.chart.data.labels[context.dataIndex],
       },
     },
     layout: {

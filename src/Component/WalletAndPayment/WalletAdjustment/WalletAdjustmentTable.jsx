@@ -1,151 +1,33 @@
-import React, { useState } from 'react';
-import { FiSearch } from 'react-icons/fi';
-
-const sampleData = [
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  {
-    date: '24-Jul-25',
-    userName: 'Asad Raza',
-    type: 'Bonus',
-    amount: '+500',
-    reason: 'July contest winner',
-    admin: 'Admin A',
-  },
-  // Add more static data or fetch from backend later
-];
+import React, { useEffect, useState } from 'react';
+import axiosInstance from '../../../services/axiosConfig';
 
 const WalletAdjustmentTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const [logs, setLogs] = useState([]);
+  const [pages, setPages] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const totalPages = Math.ceil(sampleData.length / itemsPerPage);
-  const paginatedData = sampleData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  useEffect(() => {
+    const fetchLogs = async () => {
+      setLoading(true);
+      try {
+        const res = await axiosInstance.get('/wallet/admin/adjustments/logs', { params: { page: currentPage, limit: 20 } });
+        const d = res.data?.data || res.data;
+        setLogs(d?.logs || []);
+        setPages(d?.pages || 1);
+      } catch (e) {
+        setLogs([]);
+        setPages(1);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLogs();
+  }, [currentPage]);
 
   return (
     <div className="min-h-screen px-8 py-10  text-yellow-300 font-sans">
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Select Box */}
-        <div className="flex items-center border border-yellow-400 rounded-full px-4 py-2">
-          <select className="bg-transparent w-full focus:outline-none bg-[#013220]">
-            <option>Select User/Driver</option>
-            <option>User</option>
-            <option>Driver</option>
-          </select>
-          <FiSearch className="text-yellow-300" />
-        </div>
-
-        {/* Apply Button */}
-        <div className="text-center">
-          <button className="bg-yellow-400 text-black px-6 py-2 rounded-full font-semibold">
-            Apply Adjustment
-          </button>
-        </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
@@ -162,16 +44,21 @@ const WalletAdjustmentTable = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((item, index) => (
+              {(loading ? [] : logs).map((item, index) => (
                 <tr key={index} className="">
-                  <td className="py-2 px-4 border-b border-yellow-400">{item.date}</td>
-                  <td className="py-2 px-4 border-b border-yellow-400">{item.userName}</td>
+                  <td className="py-2 px-4 border-b border-yellow-400">{new Date(item.date).toLocaleString()}</td>
+                  <td className="py-2 px-4 border-b border-yellow-400">{item.userName || item.username}</td>
                   <td className="py-2 px-4 border-b border-yellow-400">{item.type}</td>
-                  <td className="py-2 px-4 border-b border-yellow-400">{item.amount}</td>
+                  <td className="py-2 px-4 border-b border-yellow-400">AED {Number(item.amount || 0).toLocaleString()}</td>
                   <td className="py-2 px-4 border-b border-yellow-400">{item.reason}</td>
-                  <td className="py-2 px-4 border-b border-yellow-400">{item.admin}</td>
+                  <td className="py-2 px-4 border-b border-yellow-400">{item.adminName || item.adminEmail}</td>
                 </tr>
               ))}
+              {(!loading && logs.length === 0) && (
+                <tr>
+                  <td className="py-4 px-4 text-center" colSpan={6}>No adjustments found</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -185,7 +72,7 @@ const WalletAdjustmentTable = () => {
           >
             Previous
           </button>
-          {Array.from({ length: totalPages }).map((_, index) => (
+          {Array.from({ length: pages }).map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentPage(index + 1)}
@@ -197,9 +84,9 @@ const WalletAdjustmentTable = () => {
             </button>
           ))}
           <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pages))}
             className="hover:underline disabled:opacity-50"
-            disabled={currentPage === totalPages}
+            disabled={currentPage === pages}
           >
             Next
           </button>

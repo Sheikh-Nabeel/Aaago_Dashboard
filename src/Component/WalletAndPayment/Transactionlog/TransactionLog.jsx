@@ -1,37 +1,45 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import Sidebar from '../../Home/Sidebar';
 import WalletPaymentNavbar from '../WalletPaymentNavbar';
+import axiosInstance from '../../../services/axiosConfig';
 
-const sampleData = [
-  {
-    type: 'Top-up',
-    Userid: 'CUST-7861',
-    amount: 'AED 1,000',
-    timestamp: '29 July, 09:15\nAM',
-    notes: 'JazzCash via\napp',
-    tags: 'Bonus',
-  },
-  {
-    type: 'Top-up',
-    Userid: 'CUST-7861',
-    amount: 'AED 1,000',
-    timestamp: '29 July, 09:15\nAM',
-    notes: 'JazzCash via\napp',
-    tags: 'Bonus',
-  },
-  // Add more entries as needed
-];
+const formatAED = (n) => `AED ${Number(n || 0).toLocaleString()}`;
 
 const TransactionLog = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const [transactions, setTransactions] = useState([]);
+  const [pages, setPages] = useState(1);
+  const [minAmount, setMinAmount] = useState('');
+  const [maxAmount, setMaxAmount] = useState('');
+  const [date, setDate] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const totalPages = Math.ceil(sampleData.length / itemsPerPage);
-  const paginatedData = sampleData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const fetchTransactions = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        minAmount: minAmount === '' ? undefined : Number(minAmount),
+        maxAmount: maxAmount === '' ? undefined : Number(maxAmount),
+        startDate: date || undefined,
+        endDate: date || undefined,
+        page: currentPage,
+        limit: 20,
+      };
+      const res = await axiosInstance.get('/wallet/admin/transactions', { params });
+      const d = res.data?.data || res.data;
+      setTransactions(d?.transactions || []);
+      setPages(d?.pages || d?.pagination?.pages || 1);
+    } catch (e) {
+      setTransactions([]);
+      setPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchTransactions(); }, [currentPage]);
+  const onSearch = (e) => { e?.preventDefault?.(); setCurrentPage(1); fetchTransactions(); };
 
   return (
     <div className="flex min-h-screen">
@@ -52,6 +60,8 @@ const TransactionLog = () => {
                   <span className="text-sm font-medium">Amount Range</span>
                   <input
                     type="number"
+                    value={minAmount}
+                    onChange={(e) => setMinAmount(e.target.value)}
                     className="w-20 px-2 border bg-transparent border-yellow-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400"
                   />
                 </label>
@@ -61,6 +71,8 @@ const TransactionLog = () => {
                   <span className="text-sm font-medium">To</span>
                   <input
                     type="number"
+                    value={maxAmount}
+                    onChange={(e) => setMaxAmount(e.target.value)}
                     className="w-20 px-2 bg-transparent border border-yellow-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400"
                   />
                 </label>
@@ -70,9 +82,12 @@ const TransactionLog = () => {
                   <span className="text-sm font-medium">Date</span>
                   <input
                     type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
                     className="px-2 bg-transparent border border-yellow-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-400"
                   />
                 </label>
+                <button onClick={onSearch} className="rounded-full border border-yellow-400 px-3 py-1"><FiSearch /></button>
               </div>
             </div>
 
@@ -91,21 +106,24 @@ const TransactionLog = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.map((item, index) => (
+                  {(loading ? [] : transactions).map((item, index) => (
                     <tr key={index}>
                       <td className="py-2 px-4 border-b border-yellow-400">{item.type}</td>
-                      <td className="py-2 px-4 border-b border-yellow-400">{item.Userid}</td>
-                      <td className="py-2 px-4 border-b border-yellow-400">{item.amount}</td>
-                      <td className="py-2 px-4 border-b border-yellow-400 whitespace-pre-line">{item.timestamp}</td>
-                      <td className="py-2 px-4 border-b border-yellow-400 whitespace-pre-line">{item.notes}</td>
-                      <td className="py-2 px-4 border-b border-yellow-400">{item.tags}</td>
+                      <td className="py-2 px-4 border-b border-yellow-400">{item.userId}</td>
+                      <td className="py-2 px-4 border-b border-yellow-400">{formatAED(item.amount)}</td>
+                      <td className="py-2 px-4 border-b border-yellow-400">{new Date(item.timestamp).toLocaleString()}</td>
+                      <td className="py-2 px-4 border-b border-yellow-400 whitespace-pre-line">{item.description || item.adminNote || ''}</td>
+                      <td className="py-2 px-4 border-b border-yellow-400">{Array.isArray(item.tags) ? item.tags.join(', ') : ''}</td>
                       <td className="py-2 px-4 border-b border-yellow-400">
-                        <button className="bg-yellow-300 px-6 py-1 rounded-full text-black hover:bg-yellow-200">
+                        <button className="bg-yellow-300 px-6 py-1 rounded-full text.black hover:bg-yellow-200">
                           Note
                         </button>
                       </td>
                     </tr>
                   ))}
+                  {(!loading && transactions.length === 0) && (
+                    <tr><td className="py-4 px-4 text-center" colSpan={7}>No transactions</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -120,7 +138,7 @@ const TransactionLog = () => {
                 Previous
               </button>
 
-              {Array.from({ length: totalPages }).map((_, index) => (
+              {Array.from({ length: pages }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentPage(index + 1)}
@@ -133,9 +151,9 @@ const TransactionLog = () => {
               ))}
 
               <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pages))}
                 className="hover:underline disabled:opacity-50"
-                disabled={currentPage === totalPages}
+                disabled={currentPage === pages}
               >
                 Next
               </button>

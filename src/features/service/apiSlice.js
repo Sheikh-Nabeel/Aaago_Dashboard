@@ -70,6 +70,45 @@ export const apiSlice = createApi({
         return response?.data || response;
       },
     }),
+    getVehicleSelectFlow: builder.query({
+      query: () => ({
+        url: "/vehicles/select-flow",
+        method: "GET",
+      }),
+      transformResponse: (response) => response?.flow || response?.data?.flow || response,
+    }),
+    getComprehensivePricing: builder.query({
+      query: ({ category, service, subService }) => ({
+        url: "/admin/comprehensive-pricing",
+        method: "GET",
+        params: {
+          ...(category ? { category } : {}),
+          ...(service ? { service } : {}),
+          ...(subService ? { subService } : {}),
+        },
+      }),
+      transformResponse: (response) => response?.data || response,
+    }),
+    updateComprehensivePricing: builder.mutation({
+      query: ({ category, service, subService, body }) => ({
+        url: "/admin/comprehensive-pricing",
+        method: "PUT",
+        params: {
+          ...(category ? { category } : {}),
+          ...(service ? { service } : {}),
+          ...(subService ? { subService } : {}),
+        },
+        body,
+      }),
+      transformResponse: (response) => response?.data || response,
+    }),
+    getWalletOverview: builder.query({
+      query: () => ({
+        url: "/wallet/admin/overview",
+        method: "GET",
+      }),
+      transformResponse: (response) => response?.data || response,
+    }),
   }),
 });
 
@@ -79,5 +118,9 @@ export const {
   useApproveKycMutation, 
   useRejectKycMutation,
   useGetCurrentUserQuery,
-  useGetPendingApprovalsEarningsQuery
+  useGetPendingApprovalsEarningsQuery,
+  useGetVehicleSelectFlowQuery,
+  useLazyGetComprehensivePricingQuery,
+  useUpdateComprehensivePricingMutation,
+  useGetWalletOverviewQuery
 } = apiSlice;
